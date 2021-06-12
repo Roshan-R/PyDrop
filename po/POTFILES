@@ -1,0 +1,7 @@
+data/com.github.Roshan_R.PyDrop.desktop.in
+data/com.github.Roshan_R.PyDrop.appdata.xml.in
+data/com.github.Roshan_R.PyDrop.gschema.xml
+src/window.ui
+src/main.py
+src/window.py
+

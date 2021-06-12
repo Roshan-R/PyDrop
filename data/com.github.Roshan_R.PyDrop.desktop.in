@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=pydrop
+Exec=pydrop
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true
