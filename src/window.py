@@ -20,12 +20,15 @@ from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 import re
 import validators
+import io
+
 
 from urllib.parse import unquote
 import magic
 import requests
 from PIL import Image
-from io import StringIO
+import os
+
 
 import threading
 
@@ -46,6 +49,25 @@ class PydropWindow(Gtk.ApplicationWindow):
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
         print(info)
+
+        
+        # Application/Octect stream
+        if info == 123:
+            image = Image.open(io.BytesIO(data.get_data()))
+            format = image.format.lower()
+            image.save(f"/tmp/pydrop/{self.count}.{format}")
+            x = self.icon.get_pixel_size() + 50
+            pixbuf = Pixbuf.new_from_file_at_scale(f"/tmp/pydrop/{self.count}.{format}", x, x, True)
+            print("This in an image")
+            self.link_stack.append(f"file:///tmp/pydrop/{self.count}.{format}")
+            self.icon.set_from_pixbuf(pixbuf)
+            self.count += 1
+            a = "special"
+        # text/html
+
+        if info == 321:
+            print(data.get_text())
+
         if info == TARGET_ENTRY_URI:
             print(data.get_uris())
             for uri in data.get_uris():
@@ -144,7 +166,7 @@ class PydropWindow(Gtk.ApplicationWindow):
         r = requests.get(link)
 
         extension = r.headers["content-type"].split('/')[1]
-        self.file_path = f"/tmp/{self.count}.{extension}"
+        self.file_path = f"/tmp/pydrop/{self.count}.{extension}"
 
         with open(self.file_path, "wb") as f:
             f.write(r.content)
@@ -170,6 +192,12 @@ class PydropWindow(Gtk.ApplicationWindow):
         print(data.get_target())
         data.set_uris(self.link_stack)
 
+
+    def end(self, data, info):
+        print("Closing Window")
+        self.close()
+
+
     def drop_source(self, widget, drag_context, x, y, time, data):
         print("DROPPED MMMEEE")
         self.stack.set_visible_child(self.icon)
@@ -186,9 +214,13 @@ class PydropWindow(Gtk.ApplicationWindow):
         self.initial = 1
         self.stick()
         self.set_keep_above(True)
+        if not os.path.exists('/tmp/pydrop'):
+            os.mkdir("/tmp/pydrop")
         # drop destination stuff
         enforce_target = [
+            Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), 123),
             Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_ENTRY_URI),
+            
             Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_ENTRY_TEXT),
         ]
 
@@ -214,3 +246,4 @@ class PydropWindow(Gtk.ApplicationWindow):
         )
         self.button.connect("drag-begin", self.hello)
         self.button.connect("drag-data-get", self.on_drag_data_get)
+        self.button.connect("drag-end", self.end)
