@@ -2,22 +2,31 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <template class="PydropWindow" parent="GtkApplicationWindow">
+  <requires lib="libhandy" version="0.0"/>
+  <template class="PydropWindow" parent="HdyWindow">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
+    <property name="title" translatable="yes">PyDrop</property>
     <property name="window-position">mouse</property>
-    <property name="default-width">210</property>
-    <property name="default-height">210</property>
+    <property name="default-width">220</property>
+    <property name="default-height">225</property>
     <child>
       <object class="GtkBox" id="droparea">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkHeaderBar" id="headerbar">
+          <object class="HdyHeaderBar" id="headerbar">
+            <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="title">PyDrop</property>
+            <property name="title" translatable="yes">PyDrop</property>
+            <property name="has-subtitle">False</property>
+            <property name="spacing">0</property>
             <property name="show-close-button">True</property>
+            <property name="decoration-layout">:close</property>
+            <child>
+              <placeholder/>
+            </child>
             <style>
               <class name="flat"/>
             </style>
@@ -39,23 +48,32 @@
                 <property name="can-focus">False</property>
                 <property name="transition-duration">100</property>
                 <child>
-                  <object class="GtkImage" id="icon">
+                  <object class="GtkBox" id="eventbox">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="has-focus">True</property>
-                    <property name="is-focus">True</property>
-                    <property name="can-default">True</property>
-                    <property name="has-default">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="pixel-size">80</property>
-                    <property name="icon-name">upload-media</property>
-                    <property name="use-fallback">True</property>
-                    <property name="icon_size">5</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkImage" id="icon">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="can-default">True</property>
+                        <property name="has-default">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="pixel-size">80</property>
+                        <property name="icon-name">upload-media</property>
+                        <property name="use-fallback">True</property>
+                        <property name="icon_size">5</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
-                    <property name="name">page0</property>
+                    <property name="name">eventbox</property>
                     <property name="title" translatable="yes">page0</property>
-                    <property name="needs-attention">True</property>
                   </packing>
                 </child>
                 <child>
@@ -90,7 +108,6 @@
           <object class="GtkButton" id="button">
             <property name="label">gtk-go-down</property>
             <property name="name">button</property>
-            <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
             <property name="halign">center</property>
@@ -108,23 +125,4 @@
       </object>
     </child>
   </template>
-  <object class="GtkLabel">
-    <property name="name">label</property>
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="label" translatable="yes">label</property>
-    <attributes>
-      <attribute name="font-desc" value="Sans 17"/>
-    </attributes>
-  </object>
-  <object class="GtkButton">
-    <property name="label" translatable="yes">button</property>
-    <property name="visible">True</property>
-    <property name="can-focus">True</property>
-    <property name="receives-default">True</property>
-  </object>
-  <object class="GtkSpinner">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-  </object>
 </interface>

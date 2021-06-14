@@ -19,8 +19,9 @@ import sys
 import gi
 
 gi.require_version('Gtk', '3.0')
+gi.require_version('Handy', '1')
 
-from gi.repository import Gtk, Gio, Gdk, GLib
+from gi.repository import Gtk, Gio, Gdk, GLib, Handy
 
 from .window import PydropWindow
 
@@ -32,7 +33,7 @@ class Application(Gtk.Application):
 
         css_provider = Gtk.CssProvider()
         css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/style.css')
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION) 
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         #styleContext = Gtk.StyleContext()
         #styleContext.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 

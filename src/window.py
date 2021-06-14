@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, Gio
+import gi
+
+gi.require_version('Handy', '1')
+from gi.repository import Gtk, Gdk, Gio, Handy
 from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 import re
@@ -36,9 +39,10 @@ import threading
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/window.ui")
-class PydropWindow(Gtk.ApplicationWindow):
+class PydropWindow(Handy.Window):
     __gtype_name__ = "PydropWindow"
 
+    Handy.init()
     icon = Gtk.Template.Child()
     headerbar = Gtk.Template.Child()
     droparea = Gtk.Template.Child()
@@ -46,6 +50,7 @@ class PydropWindow(Gtk.ApplicationWindow):
     drag_source = Gtk.Template.Child()
     stack = Gtk.Template.Child()
     spinner = Gtk.Template.Child()
+    eventbox = Gtk.Template.Child()
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
         print(info)
@@ -76,7 +81,7 @@ class PydropWindow(Gtk.ApplicationWindow):
                 self.count += 1
                 mime = magic.Magic(mime=True)
             try:
-                a = mime.from_file(uri[6:])
+                a = mime.from_file(uri[7:])
             except IsADirectoryError:
                 a = "inode/directory"
         elif info == TARGET_ENTRY_TEXT:
@@ -130,7 +135,7 @@ class PydropWindow(Gtk.ApplicationWindow):
                 #print(icon_name)
                 gicon = Gio.content_type_get_icon(a)
                 self.icon.set_from_gicon(gicon, 512)
-        self.stack.set_visible_child(self.icon)
+        self.stack.set_visible_child(self.eventbox)
         self.button.set_label(str(self.count) + " Files")
         if self.initial == 1:
             self.initial = 0
@@ -195,18 +200,27 @@ class PydropWindow(Gtk.ApplicationWindow):
 
     def end(self, data, info):
         print("Closing Window")
-        self.close()
+        #self.close()
 
+    #def change_cursor(self, widget, event ):
+    #    if not self.initial:
+    #        c = Gdk.Cursor(Gdk.CursorType.FLEUR)
+    #        print(self)
+    #        widget.get_window().set_cursor(c)
+
+    def revert_cursor(self, widget, event ):
+        print("The cursor has leaved the area")
 
     def drop_source(self, widget, drag_context, x, y, time, data):
         print("DROPPED MMMEEE")
-        self.stack.set_visible_child(self.icon)
+        self.stack.set_visible_child(self.eventbox)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.google_re = re.compile(
             "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
         )
+        print(self.button)
         self.button.hide()
         self.image_formats = ("image/png", "image/jpeg", "image/jpg")
         self.count = 0
@@ -244,6 +258,15 @@ class PydropWindow(Gtk.ApplicationWindow):
         self.button.drag_source_set(
             Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
         )
+
         self.button.connect("drag-begin", self.hello)
         self.button.connect("drag-data-get", self.on_drag_data_get)
         self.button.connect("drag-end", self.end)
+
+        #self.eventbox.connect("drag-begin", self.hello)
+        #self.eventbox.connect("drag-data-get", self.on_drag_data_get)
+        #self.eventbox.connect("drag-end", self.end)
+
+        #self.eventbox.connect("enter-notify-event", self.change_cursor)
+        #self.eventbox.connect("leave-notify-event", self.revert_cursor)
+
