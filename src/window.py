@@ -51,6 +51,7 @@ class PydropWindow(Handy.Window):
     stack = Gtk.Template.Child()
     spinner = Gtk.Template.Child()
     eventbox = Gtk.Template.Child()
+    iconview = Gtk.Template.Child()
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
         print(info)
@@ -183,18 +184,17 @@ class PydropWindow(Handy.Window):
 
     def hello(self, widget, data):
         print(widget, data)
+        if self.initial != 1:
+            pass
+            #self.icon.clear()
         print("Hello world")
 
     def hello_source(self, widget, drag_context, x, y, data):
         print("soure activated")
-        print(widget, drag_context, x, y, data)
         self.stack.set_visible_child(self.spinner)
 
     def on_drag_data_get(self, widget, drag_context, data, info, time):
         # print(info)
-        print(widget, drag_context, data.get_data_type(), info, time)
-        print(self.link_stack)
-        print(data.get_target())
         data.set_uris(self.link_stack)
 
 
@@ -220,7 +220,7 @@ class PydropWindow(Handy.Window):
         self.google_re = re.compile(
             "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
         )
-        print(self.button)
+        print(self.iconview.get_model())
         self.button.hide()
         self.image_formats = ("image/png", "image/jpeg", "image/jpg")
         self.count = 0
@@ -255,13 +255,13 @@ class PydropWindow(Handy.Window):
             Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_ENTRY_TEXT),
         ]
 
-        self.button.drag_source_set(
+        self.eventbox.drag_source_set(
             Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
         )
 
-        self.button.connect("drag-begin", self.hello)
-        self.button.connect("drag-data-get", self.on_drag_data_get)
-        self.button.connect("drag-end", self.end)
+        self.eventbox.connect("drag-begin", self.hello)
+        self.eventbox.connect("drag-data-get", self.on_drag_data_get)
+        self.eventbox.connect("drag-end", self.end)
 
         #self.eventbox.connect("drag-begin", self.hello)
         #self.eventbox.connect("drag-data-get", self.on_drag_data_get)

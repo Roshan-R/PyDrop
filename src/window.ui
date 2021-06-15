@@ -10,6 +10,7 @@
     <property name="window-position">mouse</property>
     <property name="default-width">220</property>
     <property name="default-height">225</property>
+    <property name="type-hint">dnd</property>
     <child>
       <object class="GtkBox" id="droparea">
         <property name="visible">True</property>
@@ -46,12 +47,16 @@
               <object class="GtkStack" id="stack">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="valign">center</property>
                 <property name="transition-duration">100</property>
                 <child>
-                  <object class="GtkBox" id="eventbox">
+                  <object class="GtkButton" id="eventbox">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="orientation">vertical</property>
+                    <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
+                    <property name="receives-default">True</property>
+                    <property name="halign">center</property>
+                    <property name="valign">end</property>
                     <child>
                       <object class="GtkImage" id="icon">
                         <property name="visible">True</property>
@@ -64,15 +69,13 @@
                         <property name="use-fallback">True</property>
                         <property name="icon_size">5</property>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
+                    <style>
+                      <class name="flat"/>
+                    </style>
                   </object>
                   <packing>
-                    <property name="name">eventbox</property>
+                    <property name="name">page0</property>
                     <property name="title" translatable="yes">page0</property>
                   </packing>
                 </child>
@@ -106,12 +109,11 @@
         </child>
         <child>
           <object class="GtkButton" id="button">
-            <property name="label">gtk-go-down</property>
+            <property name="label">button</property>
             <property name="name">button</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
             <property name="halign">center</property>
-            <property name="use-stock">True</property>
             <property name="image-position">right</property>
             <property name="always-show-image">True</property>
           </object>
@@ -125,4 +127,17 @@
       </object>
     </child>
   </template>
+  <object class="GtkTreeStore" id="treestore1"/>
+  <object class="GtkPopover" id="popover">
+    <property name="can-focus">False</property>
+    <property name="relative-to">button</property>
+    <child>
+      <object class="GtkIconView" id="iconview">
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="margin">6</property>
+        <property name="model">treestore1</property>
+      </object>
+    </child>
+  </object>
 </interface>
