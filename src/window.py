@@ -63,10 +63,10 @@ class PydropWindow(Handy.Window):
             format = image.format.lower()
             image.save(f"/tmp/pydrop/{self.count}.{format}")
             x = self.icon.get_pixel_size() + 50
-            pixbuf = Pixbuf.new_from_file_at_scale(f"/tmp/pydrop/{self.count}.{format}", x, x, True)
+            self.pixbuf = Pixbuf.new_from_file_at_scale(f"/tmp/pydrop/{self.count}.{format}", x, x, True)
             print("This in an image")
             self.link_stack.append(f"file:///tmp/pydrop/{self.count}.{format}")
-            self.icon.set_from_pixbuf(pixbuf)
+            self.icon.set_from_pixbuf(self.pixbuf)
             self.count += 1
             a = "special"
         # text/html
@@ -127,9 +127,9 @@ class PydropWindow(Handy.Window):
         if "special" not in a:
             if "image" in a:
                 x = self.icon.get_pixel_size() + 50
-                pixbuf = Pixbuf.new_from_file_at_scale(uri[6:], x, x, True)
+                self.pixbuf = Pixbuf.new_from_file_at_scale(uri[6:], x, x, True)
                 print("This in an image")
-                self.icon.set_from_pixbuf(pixbuf)
+                self.icon.set_from_pixbuf(self.pixbuf)
                 # self.icon.set_from_file(uri[6:])
             else:
                 #icon_name = Gio.content_type_get_generic_icon_name(a)
@@ -138,7 +138,22 @@ class PydropWindow(Handy.Window):
                 self.icon.set_from_gicon(gicon, 512)
         self.stack.set_visible_child(self.eventbox)
         self.button.set_label(str(self.count) + " Files")
+
         if self.initial == 1:
+            source_targets = [
+                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_ENTRY_URI),
+                Gtk.TargetEntry.new(
+                    "text/x-moz-url", Gtk.TargetFlags(4), TARGET_ENTRY_MOZ_URL
+                ),
+                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_ENTRY_TEXT),
+            ]
+
+            self.eventbox.drag_source_set(
+                Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
+            )
+            self.eventbox.connect("drag-begin", self.hello)
+            self.eventbox.connect("drag-data-get", self.on_drag_data_get)
+            self.eventbox.connect("drag-end", self.end)
             self.initial = 0
             self.button.show()
 
@@ -177,13 +192,16 @@ class PydropWindow(Handy.Window):
         with open(self.file_path, "wb") as f:
             f.write(r.content)
         x = self.icon.get_pixel_size() + 50
-        pixbuf = Pixbuf.new_from_file_at_scale(self.file_path, x, x, True)
-        self.icon.set_from_pixbuf(pixbuf)
+        self.pixbuf = Pixbuf.new_from_file_at_scale(self.file_path, x, x, True)
+        self.icon.set_from_pixbuf(self.pixbuf)
         self.link_stack.append(f"file://{self.file_path}")
         return 1
 
     def hello(self, widget, data):
         print(widget, data)
+        #Gtk.drag_set_icon_name(data, 'gtk-dnd', 0, 0)
+        Gtk.drag_set_icon_pixbuf(data, self.pixbuf, 0, 0)
+
         if self.initial != 1:
             pass
             #self.icon.clear()
@@ -247,21 +265,9 @@ class PydropWindow(Handy.Window):
 
         # drag source stuff
 
-        source_targets = [
-            Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_ENTRY_URI),
-            Gtk.TargetEntry.new(
-                "text/x-moz-url", Gtk.TargetFlags(4), TARGET_ENTRY_MOZ_URL
-            ),
-            Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_ENTRY_TEXT),
-        ]
-
-        self.eventbox.drag_source_set(
-            Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
-        )
-
-        self.eventbox.connect("drag-begin", self.hello)
-        self.eventbox.connect("drag-data-get", self.on_drag_data_get)
-        self.eventbox.connect("drag-end", self.end)
+        #self.eventbox.connect("drag-begin", self.hello)
+        #self.eventbox.connect("drag-data-get", self.on_drag_data_get)
+        #self.eventbox.connect("drag-end", self.end)
 
         #self.eventbox.connect("drag-begin", self.hello)
         #self.eventbox.connect("drag-data-get", self.on_drag_data_get)

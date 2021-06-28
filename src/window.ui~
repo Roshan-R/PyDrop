@@ -57,7 +57,7 @@
                     <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
                     <property name="halign">center</property>
-                    <property name="valign">center</property>
+                    <property name="valign">end</property>
                     <child>
                       <object class="GtkImage" id="icon">
                         <property name="visible">True</property>
