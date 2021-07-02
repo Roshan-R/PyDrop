@@ -76,11 +76,9 @@ class PydropWindow(Handy.Window):
 
         # plain
 
-        # TODO : Make a file for plain text with first word as filename
-
-        if info == TARGET_PLAIN:
-            print("Got some good old plain text")
-            print(data.get_text())
+        #if info == TARGET_PLAIN:
+        #    print("Got some good old plain text")
+        #    print(data.get_text())
 
         if info == TARGET_URI_LIST:
             print(data.get_uris())
@@ -95,8 +93,9 @@ class PydropWindow(Handy.Window):
                 a = "inode/directory"
 
         elif info == TARGET_PLAIN:
-            
+
             text = data.get_text()
+            print(text)
 
             if self.is_link(text):
                 link = text
@@ -122,8 +121,11 @@ class PydropWindow(Handy.Window):
                     a = "text/html"
             
             else:
+                # TODO : Make a file for plain text with first word as filename
                 print(data.get_text())
                 a = "text/plain"
+                #filename = write_to_file(data.get_text())
+                #link_stack.append(filename)
             self.count += 1
 
 
@@ -160,10 +162,7 @@ class PydropWindow(Handy.Window):
 
 
     def is_link(self, text):
-        if validators.url(text):
-            return True
-        else:
-            return False
+        return validators.url(text)
 
     def link_is_image(self, link):
 
