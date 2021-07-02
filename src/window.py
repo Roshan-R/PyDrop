@@ -56,9 +56,10 @@ class PydropWindow(Handy.Window):
     initial_stack = Gtk.Template.Child()
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
-        print(info)
 
+        print(info)
         
+        # TODO : handle this section better
 
         # Application/Octect stream
         if info == TARGET_OCTECT_STREAM:
@@ -75,6 +76,8 @@ class PydropWindow(Handy.Window):
 
         # plain
 
+        # TODO : Make a file for plain text with first word as filename
+
         if info == TARGET_PLAIN:
             print("Got some good old plain text")
             print(data.get_text())
@@ -90,8 +93,8 @@ class PydropWindow(Handy.Window):
                 a = mime.from_file(uri[7:].replace('%20', ' '))
             except IsADirectoryError:
                 a = "inode/directory"
-        elif info == TARGET_ENTRY_TEXT:
 
+        elif info == TARGET_PLAIN:
             
             text = data.get_text()
 
@@ -130,10 +133,7 @@ class PydropWindow(Handy.Window):
             if "image" in a:
                 x = self.icon.get_pixel_size() + 50
 
-                # TODO: Space in a filename freaks this out
-                # Desktop%20UI.psd: replace %20 with space
-
-                pixbuf = Pixbuf.new_from_file_at_scale(uri[6:], x, x, True)
+                pixbuf = Pixbuf.new_from_file_at_scale(uri[6:].replace('%20', ' '), x, x, True)
                 print("This in an image")
                 self.icon.set_from_pixbuf(pixbuf)
 
@@ -228,11 +228,11 @@ class PydropWindow(Handy.Window):
         print("Closing Window")
         #self.close()
 
-    #def change_cursor(self, widget, event ):
-    #    if not self.initial:
-    #        c = Gdk.Cursor(Gdk.CursorType.FLEUR)
-    #        print(self)
-    #        widget.get_window().set_cursor(c)
+    def change_cursor(self, widget, event ):
+        if not self.initial:
+            c = Gdk.Cursor(Gdk.CursorType.HAND1)
+            print(self)
+            widget.get_window().set_cursor(c)
 
     def revert_cursor(self, widget, event ):
         print("The cursor has leaved the area")
@@ -254,26 +254,16 @@ class PydropWindow(Handy.Window):
         self.initial = 1
         self.stick()
         self.set_keep_above(True)
+
+        # TODO : better temporary directory?
         if not os.path.exists('/tmp/pydrop'):
             os.mkdir("/tmp/pydrop")
+
         # drop destination stuff
 
-        # TODO: make TARGET_ENTRY_* Readable
-
-        """
-        for now, the targets that work are :
-            - Occlet-stream
-            - uri-list
-            - plain
-
-            We could change the range(3) to that then
-        """
-
         enforce_target = [
-            #Gtk.TargetEntry.new("application/x-moz-nativeimage", Gtk.TargetFlags(4), 2123),
-            Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), 123),
+            Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), TARGET_OCTECT_STREAM),
             Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
-            
             Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
         ]
 
@@ -281,19 +271,8 @@ class PydropWindow(Handy.Window):
             Gtk.DestDefaults.ALL, enforce_target, Gdk.DragAction.COPY
         )
         self.droparea.connect("drag-data-received", self.on_drag_data_received)
-        # self.droparea.connect("drag-motion", self.hello_source)
         self.droparea.connect("drag-drop", self.hello_source)
 
-        # drag source stuff
-
-        #self.eventbox.connect("drag-begin", self.hello)
-        #self.eventbox.connect("drag-data-get", self.on_drag_data_get)
-        #self.eventbox.connect("drag-end", self.end)
-
-        #self.eventbox.connect("drag-begin", self.hello)
-        #self.eventbox.connect("drag-data-get", self.on_drag_data_get)
-        #self.eventbox.connect("drag-end", self.end)
-
-        #self.eventbox.connect("enter-notify-event", self.change_cursor)
-        #self.eventbox.connect("leave-notify-event", self.revert_cursor)
+        self.eventbox.connect("enter-notify-event", self.change_cursor)
+        self.eventbox.connect("leave-notify-event", self.revert_cursor)
 
