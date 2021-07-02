@@ -35,7 +35,8 @@ import os
 
 import threading
 
-(TARGET_ENTRY_URI, TARGET_ENTRY_TEXT, TARGET_ENTRY_MOZ_URL) = range(3)
+#(TARGET_ENTRY_URI, TARGET_ENTRY_TEXT, TARGET_ENTRY_MOZ_URL) = range(3)
+(TARGET_OCTECT_STREAM, TARGET_URI_LIST, TARGET_PLAIN) = range(3)
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/window.ui")
@@ -52,13 +53,15 @@ class PydropWindow(Handy.Window):
     spinner = Gtk.Template.Child()
     eventbox = Gtk.Template.Child()
     iconview = Gtk.Template.Child()
+    initial_stack = Gtk.Template.Child()
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
         print(info)
 
         
+
         # Application/Octect stream
-        if info == 123:
+        if info == TARGET_OCTECT_STREAM:
             image = Image.open(io.BytesIO(data.get_data()))
             format = image.format.lower()
             image.save(f"/tmp/pydrop/{self.count}.{format}")
@@ -69,12 +72,14 @@ class PydropWindow(Handy.Window):
             self.icon.set_from_pixbuf(pixbuf)
             self.count += 1
             a = "special"
-        # text/html
 
-        if info == 321:
+        # plain
+
+        if info == TARGET_PLAIN:
+            print("Got some good old plain text")
             print(data.get_text())
 
-        if info == TARGET_ENTRY_URI:
+        if info == TARGET_URI_LIST:
             print(data.get_uris())
             for uri in data.get_uris():
                 print(uri)
@@ -119,21 +124,20 @@ class PydropWindow(Handy.Window):
             self.count += 1
 
 
-        elif info == TARGET_ENTRY_MOZ_URL:
-            print("hello?")
-
         print(a)
 
         if "special" not in a:
             if "image" in a:
                 x = self.icon.get_pixel_size() + 50
+
+                # TODO: Space in a filename freaks this out
+                # Desktop%20UI.psd: replace %20 with space
+
                 pixbuf = Pixbuf.new_from_file_at_scale(uri[6:], x, x, True)
                 print("This in an image")
                 self.icon.set_from_pixbuf(pixbuf)
-                # self.icon.set_from_file(uri[6:])
+
             else:
-                #icon_name = Gio.content_type_get_generic_icon_name(a)
-                #print(icon_name)
                 gicon = Gio.content_type_get_icon(a)
                 self.icon.set_from_gicon(gicon, 512)
         self.stack.set_visible_child(self.eventbox)
@@ -141,11 +145,8 @@ class PydropWindow(Handy.Window):
 
         if self.initial == 1:
             source_targets = [
-                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_ENTRY_URI),
-                Gtk.TargetEntry.new(
-                    "text/x-moz-url", Gtk.TargetFlags(4), TARGET_ENTRY_MOZ_URL
-                ),
-                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_ENTRY_TEXT),
+                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
+                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
             ]
 
             self.eventbox.drag_source_set(
@@ -181,6 +182,8 @@ class PydropWindow(Handy.Window):
         
 
     def download_image(self, link):
+
+        # TODO: make the download another thread
         
         print(link)
         print("Starting download...")
@@ -254,11 +257,24 @@ class PydropWindow(Handy.Window):
         if not os.path.exists('/tmp/pydrop'):
             os.mkdir("/tmp/pydrop")
         # drop destination stuff
+
+        # TODO: make TARGET_ENTRY_* Readable
+
+        """
+        for now, the targets that work are :
+            - Occlet-stream
+            - uri-list
+            - plain
+
+            We could change the range(3) to that then
+        """
+
         enforce_target = [
+            #Gtk.TargetEntry.new("application/x-moz-nativeimage", Gtk.TargetFlags(4), 2123),
             Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), 123),
-            Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_ENTRY_URI),
+            Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
             
-            Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_ENTRY_TEXT),
+            Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
         ]
 
         self.droparea.drag_dest_set(

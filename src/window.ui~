@@ -47,9 +47,49 @@
               <object class="GtkStack" id="stack">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
                 <property name="transition-duration">100</property>
+                <child>
+                  <object class="GtkBox" id="initial_stack">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <property name="baseline-position">top</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Drag and Drop something here</property>
+                        <attributes>
+                          <attribute name="weight" value="thin"/>
+                          <attribute name="absolute-size" value="23552"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="valign">center</property>
+                        <property name="stock">gtk-dnd</property>
+                        <property name="icon_size">5</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">page2</property>
+                    <property name="title" translatable="yes">page2</property>
+                  </packing>
+                </child>
                 <child>
                   <object class="GtkButton" id="eventbox">
                     <property name="visible">True</property>
@@ -57,7 +97,7 @@
                     <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
                     <property name="halign">center</property>
-                    <property name="valign">end</property>
+                    <property name="valign">center</property>
                     <child>
                       <object class="GtkImage" id="icon">
                         <property name="visible">True</property>
@@ -78,6 +118,7 @@
                   <packing>
                     <property name="name">page0</property>
                     <property name="title" translatable="yes">page0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -91,7 +132,7 @@
                   <packing>
                     <property name="name">page1</property>
                     <property name="title" translatable="yes">page1</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -128,6 +169,20 @@
       </object>
     </child>
   </template>
+  <object class="GtkBox">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
   <object class="GtkTreeStore" id="treestore1"/>
   <object class="GtkPopover" id="popover">
     <property name="can-focus">False</property>
