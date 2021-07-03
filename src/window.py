@@ -52,7 +52,7 @@ class PydropWindow(Handy.Window):
     stack = Gtk.Template.Child()
     spinner = Gtk.Template.Child()
     eventbox = Gtk.Template.Child()
-    iconview = Gtk.Template.Child()
+    #iconview = Gtk.Template.Child()
     initial_stack = Gtk.Template.Child()
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
@@ -121,11 +121,14 @@ class PydropWindow(Handy.Window):
                     a = "text/html"
             
             else:
-                # TODO : Make a file for plain text with first word as filename
-                print(data.get_text())
+                print(" Got text ")
+                file_name = f'{text.split()[0]}.txt'
+                file_path = f'/tmp/pydrop/{file_name}'
+                with open(f'{file_path}', 'w+') as f:
+                    f.write(text)
+                self.link_stack.append(f'file://{file_path}')
                 a = "text/plain"
-                #filename = write_to_file(data.get_text())
-                #link_stack.append(filename)
+
             self.count += 1
 
 
@@ -245,7 +248,7 @@ class PydropWindow(Handy.Window):
         self.google_re = re.compile(
             "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
         )
-        print(self.iconview.get_model())
+        #print(self.iconview.get_model())
         self.button.hide()
         self.image_formats = ("image/png", "image/jpeg", "image/jpg")
         self.count = 0
