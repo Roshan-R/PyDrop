@@ -52,6 +52,7 @@ class PydropWindow(Handy.Window):
     stack = Gtk.Template.Child()
     spinner = Gtk.Template.Child()
     eventbox = Gtk.Template.Child()
+    # TODO : make iconview
     #iconview = Gtk.Template.Child()
     initial_stack = Gtk.Template.Child()
 
@@ -117,6 +118,8 @@ class PydropWindow(Handy.Window):
                     #download_thread.join()
                     a = "special"
                 else:
+                    # TODO: handle link better, preferably make a file that contains the link?
+                    # investigate on which filetype to use
                     self.link_stack.append(link)
                     a = "text/html"
             
@@ -233,7 +236,6 @@ class PydropWindow(Handy.Window):
     def change_cursor(self, widget, event ):
         if not self.initial:
             c = Gdk.Cursor(Gdk.CursorType.HAND1)
-            print(self)
             widget.get_window().set_cursor(c)
 
     def revert_cursor(self, widget, event ):
