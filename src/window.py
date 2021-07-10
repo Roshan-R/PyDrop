@@ -25,7 +25,6 @@ import re
 import validators
 import io
 
-
 from urllib.parse import unquote
 import magic
 import requests
@@ -35,7 +34,6 @@ import os
 
 import threading
 
-#(TARGET_ENTRY_URI, TARGET_ENTRY_TEXT, TARGET_ENTRY_MOZ_URL) = range(3)
 (TARGET_OCTECT_STREAM, TARGET_URI_LIST, TARGET_PLAIN) = range(3)
 
 
@@ -59,27 +57,21 @@ class PydropWindow(Handy.Window):
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
 
         print(info)
-        
-        # TODO : handle this section better
 
-        # Application/Octect stream
+        # TODO: better printing debug information
+
+        # Application/Octect stream : Image from Chromuim browsers
         if info == TARGET_OCTECT_STREAM:
+            print("Got an Image from browser")
             image = Image.open(io.BytesIO(data.get_data()))
             format = image.format.lower()
             image.save(f"/tmp/pydrop/{self.count}.{format}")
             x = self.icon.get_pixel_size() + 50
             pixbuf = Pixbuf.new_from_file_at_scale(f"/tmp/pydrop/{self.count}.{format}", x, x, True)
-            print("This in an image")
             self.link_stack.append(f"file:///tmp/pydrop/{self.count}.{format}")
             self.icon.set_from_pixbuf(pixbuf)
             self.count += 1
             a = "special"
-
-        # plain
-
-        #if info == TARGET_PLAIN:
-        #    print("Got some good old plain text")
-        #    print(data.get_text())
 
         if info == TARGET_URI_LIST:
             print(data.get_uris())
@@ -110,19 +102,13 @@ class PydropWindow(Handy.Window):
 
                 elif self.link_is_image(link):                                            
                     self.download_image(link)
-                    # trying out multithreading so ui does not get blocked
-                    # while loading image
-
-                    #download_thread = threading.Thread(target=self.download_image, args=(link,))
-                    #download_thread.start()
-                    #download_thread.join()
                     a = "special"
                 else:
                     # TODO: handle link better, preferably make a file that contains the link?
                     # investigate on which filetype to use
                     self.link_stack.append(link)
                     a = "text/html"
-            
+
             else:
                 print(" Got text ")
                 file_name = f'{text.split()[0]}.txt'
@@ -138,13 +124,19 @@ class PydropWindow(Handy.Window):
         print(a)
 
         if "special" not in a:
-            if "image" in a:
-                x = self.icon.get_pixel_size() + 50
+            if a in self.image_formats:
 
-                pixbuf = Pixbuf.new_from_file_at_scale(uri[6:].replace('%20', ' '), x, x, True)
-                print("This in an image")
+                # TODO  : add preview support for more mime types
+                #          - gifs
+                #          - videos
+                #          - pdfs
+
+                pixbuf = Pixbuf.new_from_file_at_scale(
+                        uri[6:].replace('%20', ' '),
+                        self.image_size,
+                        self.image_size,
+                        True)
                 self.icon.set_from_pixbuf(pixbuf)
-
             else:
                 gicon = Gio.content_type_get_icon(a)
                 self.icon.set_from_gicon(gicon, 512)
@@ -153,13 +145,13 @@ class PydropWindow(Handy.Window):
 
         if self.initial == 1:
             source_targets = [
-                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
-                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
-            ]
+                    Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
+                    Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
+                    ]
 
             self.eventbox.drag_source_set(
-                Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
-            )
+                    Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
+                    )
             self.eventbox.connect("drag-begin", self.hello)
             self.eventbox.connect("drag-data-get", self.on_drag_data_get)
             self.eventbox.connect("drag-end", self.end)
@@ -184,12 +176,12 @@ class PydropWindow(Handy.Window):
         if r.headers["content-type"] in self.image_formats:
             return True
         return False
-        
+
 
     def download_image(self, link):
 
         # TODO: make the download another thread
-        
+
         print(link)
         print("Starting download...")
         r = requests.get(link)
@@ -217,7 +209,7 @@ class PydropWindow(Handy.Window):
 
         if self.initial != 1:
             pass
-            #self.icon.clear()
+        #self.icon.clear()
         print("Hello world")
 
     def hello_source(self, widget, drag_context, x, y, data):
@@ -248,8 +240,9 @@ class PydropWindow(Handy.Window):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.google_re = re.compile(
-            "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
-        )
+                "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
+                )
+        self.image_size = self.icon.get_pixel_size() + 50
         #print(self.iconview.get_model())
         self.button.hide()
         self.image_formats = ("image/png", "image/jpeg", "image/jpg")
@@ -266,17 +259,16 @@ class PydropWindow(Handy.Window):
         # drop destination stuff
 
         enforce_target = [
-            Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), TARGET_OCTECT_STREAM),
-            Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
-            Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
-        ]
+                Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), TARGET_OCTECT_STREAM),
+                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
+                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
+                ]
 
         self.droparea.drag_dest_set(
-            Gtk.DestDefaults.ALL, enforce_target, Gdk.DragAction.COPY
-        )
+                Gtk.DestDefaults.ALL, enforce_target, Gdk.DragAction.COPY
+                )
         self.droparea.connect("drag-data-received", self.on_drag_data_received)
         self.droparea.connect("drag-drop", self.hello_source)
 
         self.eventbox.connect("enter-notify-event", self.change_cursor)
         self.eventbox.connect("leave-notify-event", self.revert_cursor)
-
