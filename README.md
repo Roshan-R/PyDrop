@@ -1,6 +1,9 @@
 # PyDrop
 A free and opensource alternative to Dropover
 
+Use [releases](https://github.com/Roshan-R/PyDrop/releases) for installing a beta version
+
+
 
 ## Building
 
