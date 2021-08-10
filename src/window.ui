@@ -10,7 +10,6 @@
     <property name="window-position">mouse</property>
     <property name="default-width">220</property>
     <property name="default-height">225</property>
-    <property name="type-hint">dnd</property>
     <child>
       <object class="GtkBox" id="droparea">
         <property name="visible">True</property>
@@ -152,5 +151,4 @@
       </object>
     </child>
   </template>
-  <object class="GtkTreeStore" id="treestore1"/>
 </interface>
