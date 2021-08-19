@@ -223,7 +223,7 @@ class PydropWindow(Handy.Window):
 
     def end(self, data, info):
         print("Closing Window")
-        #self.close()
+        self.close()
 
     def change_cursor(self, widget, event ):
         if not self.initial:
@@ -236,6 +236,12 @@ class PydropWindow(Handy.Window):
     def drop_source(self, widget, drag_context, x, y, time, data):
         print("DROPPED MMMEEE")
         self.stack.set_visible_child(self.eventbox)
+
+    def hide_the_window(self, a, b):
+        print("Hiding the window")
+        self.stick()
+        self.set_keep_above(True)
+        return self.hide_on_delete()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -272,3 +278,5 @@ class PydropWindow(Handy.Window):
 
         self.eventbox.connect("enter-notify-event", self.change_cursor)
         self.eventbox.connect("leave-notify-event", self.revert_cursor)
+        #self.connect("delete-event", self.hide_the_window)
+        
