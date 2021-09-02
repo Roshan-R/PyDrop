@@ -30,9 +30,9 @@ class Application(Gtk.Application):
         super().__init__(application_id='com.github.Roshan_R.PyDrop',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
 
-        # css_provider = Gtk.CssProvider()
-        # css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/style.css')
-        # Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/style.css')
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         self.setup_actions()
 
@@ -58,7 +58,7 @@ class Application(Gtk.Application):
         about.set_modal(True)
         # about.set_version(self.version)
         about.set_program_name("PyDrop")
-        about.set_logo_icon_name("go-down")
+        about.set_logo_icon_name("folder-download-symbolic")
         about.set_authors(["Roshan R Chandar"])
         about.set_comments(_("An Opensource alternative to Dropover"))
         about.set_wrap_license(True)
