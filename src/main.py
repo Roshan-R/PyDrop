@@ -25,19 +25,16 @@ from gi.repository import Gtk, Gio, Gdk, GLib, Handy
 
 from .window import PydropWindow
 
-
 class Application(Gtk.Application):
     def __init__(self):
         super().__init__(application_id='com.github.Roshan_R.PyDrop',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
 
-        css_provider = Gtk.CssProvider()
-        css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/style.css')
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        #styleContext = Gtk.StyleContext()
-        #styleContext.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        # css_provider = Gtk.CssProvider()
+        # css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/style.css')
+        # Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-        
+        self.setup_actions()
 
     def do_activate(self):
         win = self.props.active_window
@@ -45,6 +42,33 @@ class Application(Gtk.Application):
             win = PydropWindow(application=self)
         win.present()
 
+    def setup_actions(self):
+        action = Gio.SimpleAction(name="about")
+        action.connect("activate", self.show_about_dialog)
+        self.add_action(action)
+
+        action = Gio.SimpleAction(name="quit")
+        action.connect("activate", lambda *_: self.quit())
+        self.add_action(action)
+
+
+    def show_about_dialog(self, action, param):
+        about = Gtk.AboutDialog()
+        about.set_transient_for(self.get_active_window())
+        about.set_modal(True)
+        # about.set_version(self.version)
+        about.set_program_name("PyDrop")
+        about.set_logo_icon_name("go-down")
+        about.set_authors(["Roshan R Chandar"])
+        about.set_comments(_("An Opensource alternative to Dropover"))
+        about.set_wrap_license(True)
+        about.set_license_type(Gtk.License.GPL_3_0)
+        about.set_copyright(_("Copyright 2021 Roshan R Chandar"))
+        # Translators: Replace "translator-credits" with your names, one name per line
+        about.set_translator_credits(_("translator-credits"))
+        about.set_website_label(_("GitHub"))
+        about.set_website("https://github.com/Roshan-R/PyDrop")
+        about.present()
 
 def main(version):
     app = Application()

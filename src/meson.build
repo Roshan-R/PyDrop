@@ -2,6 +2,8 @@ pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.proje
 moduledir = join_paths(pkgdatadir, 'pydrop')
 gnome = import('gnome')
 
+subdir('utils')
+
 gnome.compile_resources('pydrop',
   'pydrop.gresource.xml',
   gresource_bundle: true,

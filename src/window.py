@@ -22,7 +22,6 @@ from gi.repository import Gtk, Gdk, Gio, Handy
 from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 import re
-import validators
 import io
 
 from urllib.parse import unquote
@@ -30,6 +29,7 @@ import magic
 import requests
 from PIL import Image
 import os
+from .utils import tools
 
 
 import threading
@@ -54,9 +54,49 @@ class PydropWindow(Handy.Window):
     #iconview = Gtk.Template.Child()
     initial_stack = Gtk.Template.Child()
 
-    def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.setup_variables()
+        self.setup_signals()
 
-        print(info)
+    def setup_variables(self):
+        self.google_re = re.compile(
+                "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
+                )
+        self.image_size = self.icon.get_pixel_size() + 50
+        #print(self.iconview.get_model())
+        self.button.hide()
+        self.image_formats = ["image/png", "image/jpeg", "image/jpg"]
+        self.count = 0
+        self.link_stack = []
+        self.initial = 1
+        self.stick()
+        self.set_keep_above(True)
+
+        # TODO : better temporary directory?
+        if not os.path.exists('/tmp/pydrop'):
+            os.mkdir("/tmp/pydrop")
+
+    def setup_signals(self):
+
+        # Drop Target
+        enforce_target = [
+                Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), TARGET_OCTECT_STREAM),
+                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
+                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
+                ]
+
+        self.droparea.drag_dest_set(
+                Gtk.DestDefaults.ALL, enforce_target, Gdk.DragAction.COPY
+                )
+        self.droparea.connect("drag-data-received", self.on_drag_data_received)
+        # self.droparea.connect("drag-drop", self.hello_source)
+
+        # self.eventbox.connect("enter-notify-event", self.change_cursor)
+        # self.eventbox.connect("leave-notify-event", self.revert_cursor)
+        #self.connect("delete-event", self.hide_the_window)
+
+    def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
 
         # TODO: better printing debug information
 
@@ -74,7 +114,7 @@ class PydropWindow(Handy.Window):
             a = "special"
 
         if info == TARGET_URI_LIST:
-            print(data.get_uris())
+            # print(data.get_uris())
             for uri in data.get_uris():
                 print(uri)
                 self.link_stack.append(uri)
@@ -90,7 +130,7 @@ class PydropWindow(Handy.Window):
             text = data.get_text()
             print(text)
 
-            if self.is_link(text):
+            if tools.is_link(text):
                 link = text
                 x = self.google_re.findall(link)
                 if x:
@@ -100,7 +140,7 @@ class PydropWindow(Handy.Window):
                     self.download_image(link)
                     a = "special"
 
-                elif self.link_is_image(link):                                            
+                elif tools.link_is_image(link):
                     self.download_image(link)
                     a = "special"
                 else:
@@ -144,6 +184,9 @@ class PydropWindow(Handy.Window):
         self.button.set_label(str(self.count) + " Files")
 
         if self.initial == 1:
+
+            # Drag Dest
+
             source_targets = [
                     Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
                     Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
@@ -152,31 +195,11 @@ class PydropWindow(Handy.Window):
             self.eventbox.drag_source_set(
                     Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
                     )
-            self.eventbox.connect("drag-begin", self.hello)
+            self.eventbox.connect("drag-begin", self.change_drag_icon)
             self.eventbox.connect("drag-data-get", self.on_drag_data_get)
             self.eventbox.connect("drag-end", self.end)
             self.initial = 0
             self.button.show()
-
-
-    def is_link(self, text):
-        return validators.url(text)
-
-    def link_is_image(self, link):
-
-        """"
-            returns True is link is an image
-            else False
-
-            https://stackoverflow.com/questions/10543940/check-if-a-url-to-an-image-is-up-and-exists-in-python
-        """
-
-        self.image_formats = ("image/png", "image/jpeg", "image/jpg")
-        r = requests.head(link)
-        if r.headers["content-type"] in self.image_formats:
-            return True
-        return False
-
 
     def download_image(self, link):
 
@@ -197,86 +220,46 @@ class PydropWindow(Handy.Window):
         self.link_stack.append(f"file://{self.file_path}")
         return 1
 
-    def hello(self, widget, data):
-        print(widget, data)
-        #Gtk.drag_set_icon_name(data, 'gtk-dnd', 0, 0)
+    def change_drag_icon(self, widget, data):
         if self.icon.get_pixbuf():
             Gtk.drag_set_icon_pixbuf(data, self.icon.get_pixbuf(), 0, 0)
         else:
-            print(self.icon.get_gicon())
+            # print(self.icon.get_gicon())
             Gtk.drag_set_icon_gicon(data, self.icon.get_gicon()[0], 0, 0)
-
-
         if self.initial != 1:
             pass
         #self.icon.clear()
-        print("Hello world")
 
-    def hello_source(self, widget, drag_context, x, y, data):
-        print("soure activated")
-        self.stack.set_visible_child(self.spinner)
+    # def hello_source(self, widget, drag_context, x, y, data):
+        # print("soure activated")
+        # self.stack.set_visible_child(self.spinner)
 
     def on_drag_data_get(self, widget, drag_context, data, info, time):
         # print(info)
         data.set_uris(self.link_stack)
 
 
-    def end(self, data, info):
+    def end(self, _a, drag_context):
+        print("DragContext : " , drag_context.get_dest_window())
+        print("DragProtocol : " , drag_context.get_protocol())
         print("Closing Window")
         self.close()
 
-    def change_cursor(self, widget, event ):
-        if not self.initial:
-            c = Gdk.Cursor(Gdk.CursorType.HAND1)
-            widget.get_window().set_cursor(c)
+    # def change_cursor(self, widget, event ):
+        # if not self.initial:
+            # c = Gdk.Cursor(Gdk.CursorType.HAND1)
+            # widget.get_window().set_cursor(c)
 
-    def revert_cursor(self, widget, event ):
-        print("The cursor has leaved the area")
+    # def revert_cursor(self, widget, event ):
+        # print("The cursor has leaved the area")
 
-    def drop_source(self, widget, drag_context, x, y, time, data):
-        print("DROPPED MMMEEE")
-        self.stack.set_visible_child(self.eventbox)
+    # def drop_source(self, widget, drag_context, x, y, time, data):
+        # print("DROPPED MMMEEE")
+        # self.stack.set_visible_child(self.eventbox)
 
-    def hide_the_window(self, a, b):
-        print("Hiding the window")
-        self.stick()
-        self.set_keep_above(True)
-        return self.hide_on_delete()
+    # def hide_the_window(self, a, b):
+        # print("Hiding the window")
+        # self.stick()
+        # self.set_keep_above(True)
+        # return self.hide_on_delete()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.google_re = re.compile(
-                "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
-                )
-        self.image_size = self.icon.get_pixel_size() + 50
-        #print(self.iconview.get_model())
-        self.button.hide()
-        self.image_formats = ("image/png", "image/jpeg", "image/jpg")
-        self.count = 0
-        self.link_stack = []
-        self.initial = 1
-        self.stick()
-        self.set_keep_above(True)
-
-        # TODO : better temporary directory?
-        if not os.path.exists('/tmp/pydrop'):
-            os.mkdir("/tmp/pydrop")
-
-        # drop destination stuff
-
-        enforce_target = [
-                Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), TARGET_OCTECT_STREAM),
-                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
-                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
-                ]
-
-        self.droparea.drag_dest_set(
-                Gtk.DestDefaults.ALL, enforce_target, Gdk.DragAction.COPY
-                )
-        self.droparea.connect("drag-data-received", self.on_drag_data_received)
-        self.droparea.connect("drag-drop", self.hello_source)
-
-        self.eventbox.connect("enter-notify-event", self.change_cursor)
-        self.eventbox.connect("leave-notify-event", self.revert_cursor)
-        #self.connect("delete-event", self.hide_the_window)
-        

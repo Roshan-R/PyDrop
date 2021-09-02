@@ -27,6 +27,25 @@
             <child>
               <placeholder/>
             </child>
+            <child>
+              <object class="GtkMenuButton" id="menubutton">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="focus-on-click">False</property>
+                <property name="receives-default">True</property>
+                <property name="menu-model">menu</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">open-menu-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
             <style>
               <class name="flat"/>
             </style>
@@ -57,9 +76,12 @@
                       <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="xalign">0.5</property>
+                        <property name="yalign">0.41999998688697815</property>
+                        <property name="xpad">0</property>
+                        <property name="ypad">0</property>
                         <property name="pixel-size">50</property>
                         <property name="icon-name">go-down</property>
-                        <property name="icon_size">3</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -152,4 +174,19 @@
       </object>
     </child>
   </template>
+  <interface>
+  <menu id="menu">
+    <section>
+        <item>
+            <attribute name="label">About</attribute>
+            <attribute name="action">app.about</attribute>
+        </item>
+        <item>
+            <attribute name="label">Quit</attribute>
+            <attribute name="action">app.quit</attribute>
+        </item>
+    </section>
+  </menu>
+</interface>
+
 </interface>
