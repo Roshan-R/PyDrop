@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-	<id>com.github.Roshan_R.PyDrop.desktop</id>
-	<metadata_license>CC0-1.0</metadata_license>
-	<project_license>GPL-3.0-or-later</project_license>
-	<description>
-	</description>
+  <id>com.github.Roshan_R.PyDrop.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>PyDrop</name>
+  <summary>A free and opensource Dropover alternative</summary>
+
+
+  <url type="homepage">https://github.com/Roshan-R/PyDrop</url>
+  <url type="bugtracker">https://github.com/Roshan-R/PyDrop/issues</url>
+  <!-- Translators: please do NOT translate this -->
+  <developer_name>Roshan R Chandar</developer_name>
+  <content_rating type="oars-1.1"/>
+
+  <launchable type="desktop-id">com.github.Roshan_R.PyDrop.desktop</launchable>
+
 </component>

@@ -1,7 +1,9 @@
 [Desktop Entry]
-Name=pydrop
+Name=PyDrop
 Exec=pydrop
+Icon=com.github.Roshan_R.PyDrop
 Terminal=false
 Type=Application
-Categories=GTK;
+Categories=GTK;GNOME;Utility;
 StartupNotify=true
+Keywords=Utility;Drag;Drop;

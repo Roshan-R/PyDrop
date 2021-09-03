@@ -1,3 +1,5 @@
+subdir('logo')
+
 desktop_file = i18n.merge_file(
   input: 'com.github.Roshan_R.PyDrop.desktop.in',
   output: 'com.github.Roshan_R.PyDrop.desktop',
