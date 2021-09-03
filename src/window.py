@@ -63,8 +63,6 @@ class PydropWindow(Handy.Window):
         self.google_re = re.compile(
                 "[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
                 )
-        self.image_size = self.icon.get_pixel_size() + 50
-        #print(self.iconview.get_model())
         self.button.hide()
         self.image_formats = ["image/png", "image/jpeg", "image/jpg"]
         self.count = 0
@@ -72,6 +70,7 @@ class PydropWindow(Handy.Window):
         self.initial = 1
         self.stick()
         self.set_keep_above(True)
+        self.pixbuf_size = self.icon.get_pixel_size()
 
         # TODO : better temporary directory?
         if not os.path.exists('/tmp/pydrop'):
@@ -106,22 +105,18 @@ class PydropWindow(Handy.Window):
             image = Image.open(io.BytesIO(data.get_data()))
             format = image.format.lower()
             image.save(f"/tmp/pydrop/{self.count}.{format}")
-            x = self.icon.get_pixel_size() + 50
-            pixbuf = Pixbuf.new_from_file_at_scale(f"/tmp/pydrop/{self.count}.{format}", x, x, True)
             self.link_stack.append(f"file:///tmp/pydrop/{self.count}.{format}")
-            self.icon.set_from_pixbuf(pixbuf)
             self.count += 1
-            a = "special"
+            a = "image"
 
         if info == TARGET_URI_LIST:
-            # print(data.get_uris())
             for uri in data.get_uris():
                 print(uri)
                 self.link_stack.append(uri)
                 self.count += 1
                 mime = magic.Magic(mime=True)
             try:
-                a = mime.from_file(uri[7:].replace('%20', ' '))
+                a = mime.from_file(unquote(uri[7:]))
             except IsADirectoryError:
                 a = "inode/directory"
 
@@ -138,17 +133,19 @@ class PydropWindow(Handy.Window):
                     print("this is a google image : ", link)
                     print("Google image link : ", link)
                     self.download_image(link)
-                    a = "special"
+                    a = "image"
 
                 elif tools.link_is_image(link):
                     self.download_image(link)
-                    a = "special"
+                    a = "image"
                 else:
                     # TODO: handle link better, preferably make a file that contains the link?
                     # investigate on which filetype to use
-                    self.link_stack.append(link)
+                    file_path = f'/tmp/pydrop/{self.count}.desktop'
+                    with open(file_path, 'w+') as f:
+                        f.write(tools.get_desktop(link))
+                        self.link_stack.append(f'file://{file_path}')
                     a = "text/html"
-
             else:
                 print(" Got text ")
                 file_name = f'{text.split()[0]}.txt'
@@ -160,46 +157,48 @@ class PydropWindow(Handy.Window):
 
             self.count += 1
 
-
-        print(a)
-
-        if "special" not in a:
-            if a in self.image_formats:
-
-                # TODO  : add preview support for more mime types
-                #          - gifs
-                #          - videos
-                #          - pdfs
-
-                pixbuf = Pixbuf.new_from_file_at_scale(
-                        uri[6:].replace('%20', ' '),
-                        self.image_size,
-                        self.image_size,
-                        True)
-                self.icon.set_from_pixbuf(pixbuf)
-            else:
-                gicon = Gio.content_type_get_icon(a)
-                self.icon.set_from_gicon(gicon, 512)
+        self.set_image(a)
         self.stack.set_visible_child(self.eventbox)
         self.button.set_label(str(self.count) + " Files")
 
         if self.initial == 1:
+            self.connect_drag_source()
 
-            # Drag Dest
 
-            source_targets = [
-                    Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
-                    Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
-                    ]
+    def connect_drag_source(self):
+        source_targets = [
+                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
+                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
+                ]
+        self.eventbox.drag_source_set(
+                Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
+                )
+        self.eventbox.connect("drag-begin", self.change_drag_icon)
+        self.eventbox.connect("drag-data-get", self.on_drag_data_get)
+        self.initial = 0
+        self.button.show()
 
-            self.eventbox.drag_source_set(
-                    Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
-                    )
-            self.eventbox.connect("drag-begin", self.change_drag_icon)
-            self.eventbox.connect("drag-data-get", self.on_drag_data_get)
-            self.eventbox.connect("drag-end", self.end)
-            self.initial = 0
-            self.button.show()
+
+    def set_image(self, a):
+        file_path = unquote(self.link_stack[-1][7:])
+        icon_path = tools.get_thumbnail(file_path, 512)
+        print(file_path, icon_path, a)
+        if not icon_path:
+            print("Did not get themed icon")
+            if "image" in a:
+                print("Got image")
+                try:
+                    pixbuf = Pixbuf.new_from_file_at_scale(file_path, self.pixbuf_size, self.pixbuf_size, True)
+                    self.icon.set_from_pixbuf(pixbuf)
+                except :
+                    self.icon.set_from_gicon(Gio.content_type_get_icon(a), 512)
+            else:
+                gicon = Gio.content_type_get_icon(a)
+                self.icon.set_from_gicon(gicon, 512)
+        else:
+            print("Normal")
+            pixbuf = Pixbuf.new_from_file_at_scale(icon_path, self.pixbuf_size, self.pixbuf_size, True)
+            self.icon.set_from_pixbuf(pixbuf)
 
     def download_image(self, link):
 
@@ -214,13 +213,14 @@ class PydropWindow(Handy.Window):
 
         with open(self.file_path, "wb") as f:
             f.write(r.content)
-        x = self.icon.get_pixel_size() + 50
-        pixbuf = Pixbuf.new_from_file_at_scale(self.file_path, x, x, True)
-        self.icon.set_from_pixbuf(pixbuf)
+        #x = self.icon.get_pixel_size() + 50
+        #pixbuf = Pixbuf.new_from_file_at_scale(self.file_path, x, x, True)
+        #self.icon.set_from_pixbuf(pixbuf)
         self.link_stack.append(f"file://{self.file_path}")
         return 1
 
     def change_drag_icon(self, widget, data):
+        self.dropped = 0
         if self.icon.get_pixbuf():
             Gtk.drag_set_icon_pixbuf(data, self.icon.get_pixbuf(), 0, 0)
         else:
@@ -234,16 +234,12 @@ class PydropWindow(Handy.Window):
         # print("soure activated")
         # self.stack.set_visible_child(self.spinner)
 
-    def on_drag_data_get(self, widget, drag_context, data, info, time):
-        # print(info)
-        data.set_uris(self.link_stack)
-
-
-    def end(self, _a, drag_context):
-        print("DragContext : " , drag_context.get_dest_window())
-        print("DragProtocol : " , drag_context.get_protocol())
-        print("Closing Window")
+    def finished(self, _a):
         self.close()
+
+    def on_drag_data_get(self, widget, drag_context, data, info, time):
+        drag_context.connect("dnd-finished", self.finished)
+        data.set_uris(self.link_stack)
 
     # def change_cursor(self, widget, event ):
         # if not self.initial:

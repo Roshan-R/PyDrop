@@ -30,9 +30,9 @@
             <child>
               <object class="GtkMenuButton" id="menubutton">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="focus-on-click">False</property>
-                <property name="receives-default">True</property>
+                <property name="can-focus">False</property>
+
                 <property name="menu-model">menu</property>
                 <style>
                   <class name="flat"/>
@@ -84,7 +84,7 @@
                         <property name="xpad">0</property>
                         <property name="ypad">0</property>
                         <property name="pixel-size">50</property>
-                        <property name="icon-name">folder-download-symbolic</property>
+                        <property name="icon-name">go-jump-symbolic</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
