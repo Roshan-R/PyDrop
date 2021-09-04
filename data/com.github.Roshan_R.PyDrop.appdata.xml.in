@@ -5,10 +5,25 @@
   <project_license>GPL-3.0-or-later</project_license>
   <name>PyDrop</name>
   <summary>A free and opensource alternative to Dropover</summary>
-  <description>PyDrop is a free and opensource alternative to Dropover. Use PyDrop to move data between applications fast and intuitively </description>
+  <description>
+    <p>PyDrop is a free and opensource alternative to Dropover.</p>
+    <p>Use PyDrop to move data between applications fast and intuitively</p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+        <image>https://raw.githubusercontent.com/Roshan-R/PyDrop/CI-flatpak/screenshots/screenshot.png</image>
+    </screenshot>
+  </screenshots>
   <url type="homepage">https://github.com/Roshan-R/PyDrop</url>
   <url type="bugtracker">https://github.com/Roshan-R/PyDrop/issues</url>
   <developer_name>Roshan R Chandar</developer_name>
   <content_rating type="oars-1.1"/>
   <launchable type="desktop-id">com.github.Roshan_R.PyDrop.desktop</launchable>
+  <releases>
+    <release version="0.1.0" date="2021-09-5">
+      <description>
+        <p>Initial release.</p>
+      </description>
+    </release>
+  </releases>
 </component>
