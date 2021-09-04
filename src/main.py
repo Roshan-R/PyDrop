@@ -47,18 +47,13 @@ class Application(Gtk.Application):
         action.connect("activate", self.show_about_dialog)
         self.add_action(action)
 
-        action = Gio.SimpleAction(name="quit")
-        action.connect("activate", lambda *_: self.quit())
-        self.add_action(action)
-
-
     def show_about_dialog(self, action, param):
         about = Gtk.AboutDialog()
         about.set_transient_for(self.get_active_window())
         about.set_modal(True)
         # about.set_version(self.version)
         about.set_program_name("PyDrop")
-        about.set_logo_icon_name("folder-download-symbolic")
+        about.set_logo_icon_name("com.github.Roshan_R.PyDrop")
         about.set_authors(["Roshan R Chandar"])
         about.set_comments(_("An Opensource alternative to Dropover"))
         about.set_wrap_license(True)
