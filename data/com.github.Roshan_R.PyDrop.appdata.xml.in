@@ -5,8 +5,7 @@
   <project_license>GPL-3.0-or-later</project_license>
   <name>PyDrop</name>
   <summary>A free and opensource alternative to Dropover</summary>
-  <description>PyDrop is a free and opensource alternative to Dropover. 
-    Use PyDrop to move data between applications fast and intuitively </description>
+  <description>PyDrop is a free and opensource alternative to Dropover. Use PyDrop to move data between applications fast and intuitively </description>
   <url type="homepage">https://github.com/Roshan-R/PyDrop</url>
   <url type="bugtracker">https://github.com/Roshan-R/PyDrop/issues</url>
   <developer_name>Roshan R Chandar</developer_name>
