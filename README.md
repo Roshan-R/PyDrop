@@ -6,7 +6,7 @@
 <p align="center"><strong>A free and opensource alternative to Dropover</strong></p>
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/43182697/131822069-7729c131-b019-408e-a5fd-0ff724e2589d.png" width="650" alt="Preview"/>
+  <img src="https://github.com/Roshan-R/PyDrop/blob/main/screenshots/screenshot.png?raw=true" width="650" alt="Preview"/>
 </p>
 
 Use [releases](https://github.com/Roshan-R/PyDrop/releases) for installing a beta version
