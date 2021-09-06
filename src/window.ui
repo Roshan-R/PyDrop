@@ -10,6 +10,7 @@
     <property name="window-position">mouse</property>
     <property name="default-width">220</property>
     <property name="default-height">225</property>
+    <property name="type-hint">dialog</property>
     <child>
       <object class="GtkBox" id="droparea">
         <property name="visible">True</property>
@@ -23,7 +24,6 @@
             <property name="has-subtitle">False</property>
             <property name="spacing">0</property>
             <property name="show-close-button">True</property>
-            <property name="decoration-layout">:close</property>
             <child>
               <placeholder/>
             </child>
