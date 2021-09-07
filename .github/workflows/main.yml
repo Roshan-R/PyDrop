@@ -25,4 +25,4 @@ jobs:
         with:
          debug: true
          target: pkgbuild
-         pkgname: /build-aux/arch/
+         pkgname: build-aux/arch
