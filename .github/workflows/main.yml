@@ -21,8 +21,8 @@ jobs:
     name: Validate PKGBUILD
     runs-on: ubuntu-latest
     steps:
-      - uses: grumlimited/arch-pkgbuild-builder@b0f22da174699e6795f4434f252e15e6c8265b9e
+      - uses: 2m/arch-pkgbuild-builder@v1.16
         with:
          debug: true
          target: pkgbuild
-         pkgname: build-aux/arch/
+         pkgname: /build-aux/arch/
