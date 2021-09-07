@@ -21,6 +21,7 @@ jobs:
     name: Validate PKGBUILD
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: 2m/arch-pkgbuild-builder@v1.16
         with:
          debug: true
