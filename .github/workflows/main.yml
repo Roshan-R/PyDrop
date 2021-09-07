@@ -17,3 +17,12 @@ jobs:
         bundle: PyDrop.flatpak
         manifest-path: com.github.Roshan_R.PyDrop.json
         cache-key: flatpak-builder-${{ github.sha }}
+  arch:
+    name: Validate PKGBUILD
+    runs-on: ubuntu-latest
+    steps:
+      - uses: grumlimited/arch-pkgbuild-builder@b0f22da174699e6795f4434f252e15e6c8265b9e
+        with:
+         debug: true
+         target: pkgbuild
+         pkgname: build-aux/arch/
