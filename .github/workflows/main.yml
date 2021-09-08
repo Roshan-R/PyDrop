@@ -34,4 +34,5 @@ jobs:
     - name: Upload Package Archive
       uses: actions/upload-artifact@v2
       with:
+        name: PyDrop.pkg.tar.zst.zip
         path: ${{ steps.makepkg.outputs.pkgfile0 }}
