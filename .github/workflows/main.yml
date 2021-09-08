@@ -18,12 +18,10 @@ jobs:
         manifest-path: com.github.Roshan_R.PyDrop.json
         cache-key: flatpak-builder-${{ github.sha }}
   arch:
-    name: Validate PKGBUILD
+    name: Build PKGBUILD
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: 2m/arch-pkgbuild-builder@v1.16
+      - uses: ouuan/pkgbuild-action@master
         with:
-         debug: true
-         target: pkgbuild
-         pkgname: build-aux/arch
+          path: build-aux/arch/PKGBUILD
