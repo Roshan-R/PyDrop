@@ -18,6 +18,7 @@ depends=(
 )
 makedepends=(
   meson
+  git
 )
 source=("git://github.com/Roshan-R/PyDrop.git")
 md5sums=("SKIP")
