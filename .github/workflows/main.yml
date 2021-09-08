@@ -17,11 +17,21 @@ jobs:
         bundle: PyDrop.flatpak
         manifest-path: com.github.Roshan_R.PyDrop.json
         cache-key: flatpak-builder-${{ github.sha }}
-  arch:
-    name: Build PKGBUILD
+  pkgbuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: ouuan/pkgbuild-action@master
-        with:
-          path: build-aux/arch
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Makepkg Build and Check
+      with:
+        pkgdir: build-aux/arch
+      id: makepkg
+      uses: edlanglois/pkgbuild-action@v1
+    - name: Print Package Files
+      run: |
+        echo "Successfully created the following package archive"
+        echo "Package: ${{ steps.makepkg.outputs.pkgfile0 }}"
+    - name: Upload Package Archive
+      uses: actions/upload-artifact@v2
+      with:
+        path: ${{ steps.makepkg.outputs.pkgfile0 }}
