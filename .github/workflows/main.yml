@@ -24,4 +24,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ouuan/pkgbuild-action@master
         with:
-          path: build-aux/arch/PKGBUILD
+          path: /build-aux/arch/PKGBUILD
