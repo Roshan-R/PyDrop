@@ -1,0 +1,35 @@
+# Maintainer: Roshan R Chandar <roshanr2001@gmail.com>
+
+pkgver=1.0
+pkgname=PyDrop
+pkgrel=1
+pkgdesc='A free and opensource alternative to Dropover'
+arch=(any)
+url=https://github.com/Roshan-R/PyDrop
+license=(GPL3)
+depends=(
+  gtk3
+  libhandy
+  python
+  python-requests
+  python-validators
+  python-pillow
+  python-magic
+)
+makedepends=(
+  meson
+  git
+)
+source=("git://github.com/Roshan-R/PyDrop.git")
+md5sums=("SKIP")
+
+build() {
+  cd $pkgname
+  meson _build
+  ninja -C _build
+}
+
+package() {
+  cd $pkgname
+  DESTDIR="${pkgdir}" ninja -C _build install
+}
