@@ -4,13 +4,6 @@ gnome = import('gnome')
 
 subdir('utils')
 
-gnome.compile_resources('pydrop',
-  'pydrop.gresource.xml',
-  gresource_bundle: true,
-  install: true,
-  install_dir: pkgdatadir,
-)
-
 python = import('python')
 
 conf = configuration_data()

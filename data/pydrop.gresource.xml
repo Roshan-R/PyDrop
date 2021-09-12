@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/Roshan_R/PyDrop">
-    <file>window.ui</file>
-    <file>style.css</file>
+    <file>css/style.css</file>
+    <file>ui/window.ui</file>
   </gresource>
 </gresources>

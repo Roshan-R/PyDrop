@@ -37,7 +37,7 @@ import threading
 (TARGET_OCTECT_STREAM, TARGET_URI_LIST, TARGET_PLAIN) = range(3)
 
 
-@Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/window.ui")
+@Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")
 class PydropWindow(Handy.Window):
     __gtype_name__ = "PydropWindow"
 

@@ -16,6 +16,17 @@ if desktop_utils.found()
   )
 endif
 
+gnome = import('gnome')
+pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
+
+message('Compile gresource XML file')
+gnome.compile_resources('pydrop',
+  'pydrop.gresource.xml',
+  gresource_bundle: true,
+  install: true,
+  install_dir: pkgdatadir,
+)
+
 appstream_file = i18n.merge_file(
   input: 'com.github.Roshan_R.PyDrop.appdata.xml.in',
   output: 'com.github.Roshan_R.PyDrop.appdata.xml',
