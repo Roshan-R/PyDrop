@@ -69,7 +69,7 @@ def set_image(link_stack, icon, a):
         pixbuf = Pixbuf.new_from_file_at_scale(icon_path, pixbuf_size, pixbuf_size, True)
         icon.set_from_pixbuf(pixbuf)
 
-def download_image(self, link, link_stack):
+def download_image(link, link_stack, count):
 
     # TODO: make the download another thread
 
@@ -78,8 +78,8 @@ def download_image(self, link, link_stack):
     r = requests.get(link)
 
     extension = r.headers["content-type"].split('/')[1]
-    self.file_path = f"/tmp/pydrop/{self.count}.{extension}"
+    file_path = f"/tmp/pydrop/{count}.{extension}"
 
-    with open(self.file_path, "wb") as f:
+    with open(file_path, "wb") as f:
         f.write(r.content)
-    link_stack.append(f"file://{self.file_path}")
+    link_stack.append(f"file://{file_path}")

@@ -47,11 +47,11 @@ class ParseData:
                     link = unquote(x[0])
                     print("this is a google image : ", link)
                     print("Google image link : ", link)
-                    tools.download_image(link, link_stack)
+                    tools.download_image(link, link_stack, count)
                     a = "image"
 
                 elif tools.link_is_image(link):
-                    tools.download_image(link. link_stack)
+                    tools.download_image(link. link_stack, count)
                     a = "image"
                 else:
                     # TODO: handle link better, preferably make a file that contains the link?
