@@ -1,10 +1,12 @@
 import validators
 import requests
 import os
+from urllib.parse import unquote
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gio , Gtk
+from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 def link_is_image(link):
    """"
@@ -43,3 +45,41 @@ def get_thumbnail(filename,size):
 
 def get_desktop(link):
     return f"[Desktop Entry]\nEncoding=UTF-8\nType=Link\nURL={link}\nIcon=text-html"
+
+pixbuf_size = 80
+
+def set_image(link_stack, icon, a):
+    file_path = unquote(link_stack[-1][7:])
+    icon_path = get_thumbnail(file_path, 512)
+    print(file_path, icon_path, a)
+    if not icon_path:
+        print("Did not get themed icon")
+        if "image" in a:
+            print("Got image")
+            try:
+                pixbuf = Pixbuf.new_from_file_at_scale(file_path, pixbuf_size, pixbuf_size, True)
+                icon.set_from_pixbuf(pixbuf)
+            except :
+                icon.set_from_gicon(Gio.content_type_get_icon(a), 512)
+        else:
+            gicon = Gio.content_type_get_icon(a)
+            icon.set_from_gicon(gicon, 512)
+    else:
+        print("Normal")
+        pixbuf = Pixbuf.new_from_file_at_scale(icon_path, pixbuf_size, pixbuf_size, True)
+        icon.set_from_pixbuf(pixbuf)
+
+def download_image(self, link, link_stack):
+
+    # TODO: make the download another thread
+
+    print(link)
+    print("Starting download...")
+    r = requests.get(link)
+
+    extension = r.headers["content-type"].split('/')[1]
+    self.file_path = f"/tmp/pydrop/{self.count}.{extension}"
+
+    with open(self.file_path, "wb") as f:
+        f.write(r.content)
+    link_stack.append(f"file://{self.file_path}")

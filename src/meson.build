@@ -24,7 +24,7 @@ pydrop_sources = [
   '__init__.py',
   'main.py',
   'window.py',
-  'style.css',
+  'parsedata.py',
 ]
 
 install_data(pydrop_sources, install_dir: moduledir)
