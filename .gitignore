@@ -1,5 +1,9 @@
 # Build directory that I use
 
+AppDir/
+info.txt
+requirements.txt
+
 _build/
 
 # glade file
