@@ -25,7 +25,7 @@ from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 from .utils import tools
 from .parsedata import ParseData
 
-(TARGET_OCTECT_STREAM, TARGET_URI_LIST, TARGET_PLAIN) = range(3)
+(TARGET_OCTECT_STREAM, TARGET_PNG,TARGET_URI_LIST, TARGET_PLAIN) = range(4)
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")
@@ -67,6 +67,8 @@ class PydropWindow(Handy.Window):
         # Drop Target
         enforce_target = [
                 Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), TARGET_OCTECT_STREAM),
+                Gtk.TargetEntry.new("image/png", Gtk.TargetFlags(4), TARGET_PNG),
+
                 Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
                 Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
                 ]

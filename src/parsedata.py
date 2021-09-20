@@ -1,4 +1,5 @@
-(TARGET_OCTECT_STREAM, TARGET_URI_LIST, TARGET_PLAIN) = range(3)
+(TARGET_OCTECT_STREAM, TARGET_PNG,TARGET_URI_LIST, TARGET_PLAIN) = range(4)
+
 
 import magic
 from urllib.parse import unquote
@@ -25,8 +26,8 @@ class ParseData:
                 a = "inode/directory"
 
        # Application/Octect stream : Image from Chromuim browsers
-        if info == TARGET_OCTECT_STREAM:
-            print("Got Image from browser")
+        if info == TARGET_OCTECT_STREAM or info == TARGET_PNG:
+            print("Got Image")
             image = Image.open(io.BytesIO(data.get_data()))
             format = image.format.lower()
             image.save(f"/tmp/pydrop/{count}.{format}")
