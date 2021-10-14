@@ -78,6 +78,9 @@ class PydropWindow(Handy.Window):
                 )
         self.droparea.connect("drag-data-received", self.on_drag_data_received)
 
+        self.connect("key-press-event", self.key_press_event)
+
+
     def connect_drag_source(self):
         source_targets = [
                 Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
@@ -118,3 +121,7 @@ class PydropWindow(Handy.Window):
         if self.initial != 1:
             pass
         #self.icon.clear()
+
+    def key_press_event(self, _a, event_key):
+        if event_key.keyval == Gdk.KEY_Escape:
+            self.close()
