@@ -18,8 +18,11 @@
 import gi
 import os
 
-gi.require_version('Handy', '1')
-from gi.repository import Gtk, Gdk, Gio, Handy
+gi.require_version('Adw', '1')
+gi.require_version('Gtk', '4.0')
+gi.require_version('Gdk', '4.0')
+
+from gi.repository import Gtk, Gdk, Gio, Adw
 from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 from .utils import tools
@@ -29,10 +32,11 @@ from .parsedata import ParseData
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")
-class PydropWindow(Handy.Window):
+class PydropWindow(Adw.ApplicationWindow):
     __gtype_name__ = "PydropWindow"
 
-    Handy.init()
+    Adw.init()
+
     icon = Gtk.Template.Child()
     droparea = Gtk.Template.Child()
     button = Gtk.Template.Child()
@@ -47,15 +51,14 @@ class PydropWindow(Handy.Window):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.setup_variables()
-        self.setup_signals()
+        #self.setup_signals()
 
     def setup_variables(self):
         self.button.hide()
         self.count = 0
         self.link_stack = []
         self.initial = 1
-        self.stick()
-        self.set_keep_above(True)
+
         self.parser = ParseData()
 
         # TODO : better temporary directory?

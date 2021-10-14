@@ -16,12 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+
 import gi
+gi.require_version('Gtk', '4.0')
+gi.require_version('Adw', '1')
 
-gi.require_version('Gtk', '3.0')
-gi.require_version('Handy', '1')
-
-from gi.repository import Gtk, Gio, Gdk, GLib, Handy
+from gi.repository import Gtk, Gio, Gdk, GLib, Adw
 
 from .window import PydropWindow
 
@@ -30,9 +30,9 @@ class Application(Gtk.Application):
         super().__init__(application_id='com.github.Roshan_R.PyDrop',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
 
-        css_provider = Gtk.CssProvider()
-        css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/css/style.css')
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        #css_provider = Gtk.CssProvider()
+        #css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/css/style.css')
+        #Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         self.setup_actions()
 

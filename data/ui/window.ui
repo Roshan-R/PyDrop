@@ -1,29 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.24"/>
-  <requires lib="libhandy" version="0.0"/>
-  <template class="PydropWindow" parent="HdyWindow">
+  <requires lib="gtk" version="4.0"/>
+  <template class="PydropWindow" parent="AdwApplicationWindow">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">PyDrop</property>
-    <property name="window-position">mouse</property>
     <property name="default-width">220</property>
     <property name="default-height">225</property>
-    <property name="type-hint">dialog</property>
     <child>
       <object class="GtkBox" id="droparea">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="HdyHeaderBar" id="headerbar">
+          <object class="AdwHeaderBar" id="headerbar">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="title" translatable="yes">PyDrop</property>
-            <property name="has-subtitle">False</property>
-            <property name="spacing">0</property>
-            <property name="show-close-button">True</property>
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title" translatable="yes">PyDrop</property>
+              </object>
+            </property>
             <child>
               <placeholder/>
             </child>
@@ -32,32 +29,17 @@
                 <property name="visible">True</property>
                 <property name="focus-on-click">False</property>
                 <property name="can-focus">False</property>
-
+                <property name="icon-name">open-menu-symbolic</property>
                 <property name="menu-model">menu</property>
                 <style>
                   <class name="flat"/>
                 </style>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="icon-name">open-menu-symbolic</property>
-                  </object>
-                </child>
               </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
             </child>
             <style>
               <class name="flat"/>
             </style>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkBox" id="drag_source">
@@ -75,28 +57,19 @@
                     <property name="can-focus">False</property>
                     <property name="orientation">vertical</property>
                     <property name="baseline-position">top</property>
+                    <property name="margin-bottom">24</property>
+                    <property name="vexpand">True</property>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="xalign">0.5</property>
-                        <property name="yalign">0.41999998688697815</property>
-                        <property name="xpad">0</property>
-                        <property name="ypad">0</property>
                         <property name="pixel-size">50</property>
+                        <property name="valign">center</property>
+                        <property name="vexpand">True</property>
                         <property name="icon-name">go-jump-symbolic</property>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
-                  <packing>
-                    <property name="name">page2</property>
-                    <property name="title" translatable="yes">page2</property>
-                  </packing>
                 </child>
                 <child>
                   <object class="GtkButton" id="eventbox">
@@ -110,24 +83,14 @@
                       <object class="GtkImage" id="icon">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="can-default">True</property>
-                        <property name="has-default">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="stock">gtk-dnd</property>
                         <property name="pixel-size">80</property>
                         <property name="use-fallback">True</property>
-                        <property name="icon_size">5</property>
                       </object>
                     </child>
                     <style>
                       <class name="flat"/>
                     </style>
                   </object>
-                  <packing>
-                    <property name="name">page0</property>
-                    <property name="title" translatable="yes">page0</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
                 <child>
                   <object class="GtkSpinner" id="spinner">
@@ -135,27 +98,11 @@
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="active">True</property>
                   </object>
-                  <packing>
-                    <property name="name">page1</property>
-                    <property name="title" translatable="yes">page1</property>
-                    <property name="position">2</property>
-                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="button">
@@ -164,25 +111,18 @@
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
             <property name="halign">center</property>
-            <property name="image-position">right</property>
-            <property name="always-show-image">True</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="padding">18</property>
-            <property name="position">2</property>
-          </packing>
         </child>
       </object>
     </child>
   </template>
-    <menu id="menu">
+  <menu id="menu">
     <section>
-        <item>
-            <attribute name="label">About</attribute>
-            <attribute name="action">app.about</attribute>
-        </item>
+      <item>
+        <attribute name="label">About</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
     </section>
   </menu>
 </interface>
+
