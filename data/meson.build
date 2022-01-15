@@ -16,6 +16,14 @@ if desktop_utils.found()
   )
 endif
 
+blueprints = custom_target('blueprints',
+  input: files(
+    'ui/window.blp',
+  ),
+  output: '.',
+  command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
+)
+
 gnome = import('gnome')
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
 
@@ -25,6 +33,7 @@ gnome.compile_resources('pydrop',
   gresource_bundle: true,
   install: true,
   install_dir: pkgdatadir,
+  dependencies: blueprints,
 )
 
 appstream_file = i18n.merge_file(

@@ -1,0 +1,116 @@
+using Gtk 4.0;
+
+template PydropWindow : .AdwApplicationWindow {
+  visible: "True";
+  can-focus: "False";
+  title: _("PyDrop");
+  default-width: "220";
+  default-height: "225";
+
+  Box droparea {
+    visible: true;
+    can-focus: false;
+    orientation: vertical;
+
+    .AdwHeaderBar headerbar {
+      visible: "True";
+      can-focus: "False";
+      title-widget: 
+      .AdwWindowTitle {
+        title: _("PyDrop");
+      }
+
+      ;
+
+      MenuButton menubutton {
+        visible: true;
+        focus-on-click: false;
+        can-focus: false;
+        icon-name: "open-menu-symbolic";
+        menu-model: menu;
+
+        styles [
+          "flat",
+        ]
+      }
+
+      styles [
+        "flat",
+      ]
+    }
+
+    Box drag_source {
+      visible: true;
+      can-focus: false;
+      orientation: vertical;
+
+      Stack stack {
+        visible: true;
+        can-focus: false;
+        transition-duration: 100;
+
+        Box initial_stack {
+          visible: true;
+          can-focus: false;
+          orientation: vertical;
+          baseline-position: top;
+          margin-bottom: 24;
+          vexpand: true;
+
+          Image {
+            visible: true;
+            can-focus: false;
+            pixel-size: 50;
+            valign: center;
+            vexpand: true;
+            icon-name: "go-jump-symbolic";
+          }
+        }
+
+        Button eventbox {
+          visible: true;
+          can-focus: true;
+          focus-on-click: false;
+          receives-default: true;
+          halign: center;
+          valign: center;
+
+          Image icon {
+            visible: true;
+            can-focus: false;
+            pixel-size: 80;
+            use-fallback: true;
+          }
+
+          styles [
+            "flat",
+          ]
+        }
+
+        Spinner spinner {
+          visible: true;
+          can-focus: false;
+          halign: center;
+          valign: center;
+        }
+      }
+    }
+
+    Button button {
+      label: "button";
+      name: "button";
+      can-focus: true;
+      receives-default: true;
+      halign: center;
+    }
+  }
+}
+
+menu menu {
+  section {
+    item {
+      label: "About";
+      action: "app.about";
+    }
+  }
+}
