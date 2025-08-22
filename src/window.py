@@ -18,17 +18,17 @@
 import gi
 import os
 
-gi.require_version('Adw', '1')
-gi.require_version('Gtk', '4.0')
-gi.require_version('Gdk', '4.0')
+gi.require_version("Adw", "1")
+gi.require_version("Gtk", "4.0")
+gi.require_version("Gdk", "4.0")
 
-from gi.repository import Gtk, Gdk, Gio, Adw
+from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib
 from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 from .utils import tools
 from .parsedata import ParseData
 
-(TARGET_OCTECT_STREAM, TARGET_PNG,TARGET_URI_LIST, TARGET_PLAIN) = range(4)
+(TARGET_OCTECT_STREAM, TARGET_PNG, TARGET_URI_LIST, TARGET_PLAIN) = range(4)
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")
@@ -45,13 +45,13 @@ class PydropWindow(Adw.ApplicationWindow):
     spinner = Gtk.Template.Child()
     eventbox = Gtk.Template.Child()
     # TODO : make iconview
-    #iconview = Gtk.Template.Child()
+    # iconview = Gtk.Template.Child()
     initial_stack = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.setup_variables()
-        #self.setup_signals()
+        self.setup_signals()
 
     def setup_variables(self):
         self.button.hide()
@@ -61,70 +61,66 @@ class PydropWindow(Adw.ApplicationWindow):
 
         self.parser = ParseData()
 
+        import subprocess
+
         # TODO : better temporary directory?
-        if not os.path.exists('/tmp/pydrop'):
+        if not os.path.exists("/tmp/pydrop"):
             os.mkdir("/tmp/pydrop")
+            out = subprocess.check_output(["ls", "/tmp/pydrop"])
+            print("Output is: ", out)
+        else:
+            out = subprocess.check_output(["ls", "/tmp/pydrop"])
+            print("Already existing Output is: ", out)
 
     def setup_signals(self):
+        target = Gtk.DropTarget(actions=Gdk.DragAction.COPY)
+        target.set_gtypes([Gdk.Texture, Gdk.FileList, GObject.TYPE_STRING])
+        target.connect("drop", self.on_drop)
+        self.droparea.add_controller(target)
 
-        # Drop Target
-        enforce_target = [
-                Gtk.TargetEntry.new("application/octet-stream", Gtk.TargetFlags(4), TARGET_OCTECT_STREAM),
-                Gtk.TargetEntry.new("image/png", Gtk.TargetFlags(4), TARGET_PNG),
+        source = Gtk.DragSource()
+        source.connect("prepare", self.on_drag_prepare)
+        source.connect("drag-begin", self.on_drag_begin)
+        self.droparea.add_controller(source)
 
-                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
-                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
-                ]
+        # self.connect("key-press-event", self.key_press_event)
 
-        self.droparea.drag_dest_set(
-                Gtk.DestDefaults.ALL, enforce_target, Gdk.DragAction.COPY
-                )
-        self.droparea.connect("drag-data-received", self.on_drag_data_received)
-
-        self.connect("key-press-event", self.key_press_event)
-
-
-    def connect_drag_source(self):
-        source_targets = [
-                Gtk.TargetEntry.new("text/uri-list", Gtk.TargetFlags(4), TARGET_URI_LIST),
-                Gtk.TargetEntry.new("text/plain", Gtk.TargetFlags(4), TARGET_PLAIN),
-                ]
-        self.eventbox.drag_source_set(
-                Gdk.ModifierType.BUTTON1_MASK, source_targets, Gdk.DragAction.COPY
-                )
-        self.eventbox.connect("drag-begin", self.change_drag_icon)
-        self.eventbox.connect("drag-data-get", self.on_drag_data_get)
-        self.initial = 0
-        self.button.show()
-
-    def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
-        count, a = self.parser.parse(data, info, self.link_stack, self.count)
-        print(self.link_stack)
+    def on_drop(self, target, value, x, y):
+        count, mime_type = self.parser.parse(value, self.link_stack, self.count)
+        print(mime_type)
         self.count = count
-        tools.set_image(self.link_stack, self.icon, a)
+        tools.set_image(self.link_stack, self.icon, mime_type)
         self.stack.set_visible_child(self.eventbox)
         self.button.set_label(str(self.count) + " Files")
+        self.button.set_visible(True)
 
-        if self.initial == 1:
-            self.connect_drag_source()
+    def on_drag_prepare(self, source, x, y):
+        # TODO: just working with files right now
+        # Took from: https://github.com/mijorus/collector/blob/master/src/window.py
+        uri_list = "\n".join([f"file://{f}" for f in self.link_stack])
+        return Gdk.ContentProvider.new_union(
+            [
+                Gdk.ContentProvider.new_for_bytes(
+                    "text/uri-list", GLib.Bytes.new(uri_list.encode())
+                )
+            ]
+        )
 
-    def on_drag_data_get(self, widget, drag_context, data, info, time):
-        drag_context.connect("dnd-finished", self.finished)
-        data.set_uris(self.link_stack)
+    def on_drag_begin(self, source, widget):
+        # Change drag icon here?
+        print(source, widget)
 
-    def finished(self, _a):
-        self.close()
+        def change_drag_icon(self, widget, data):
+            self.dropped = 0
+            if self.icon.get_pixbuf():
+                Gtk.drag_set_icon_pixbuf(data, self.icon.get_pixbuf(), 0, 0)
+            else:
+                Gtk.drag_set_icon_gicon(data, self.icon.get_gicon()[0], 0, 0)
+            if self.initial != 1:
+                pass
+            # self.icon.clear()
 
-    def change_drag_icon(self, widget, data):
-        self.dropped = 0
-        if self.icon.get_pixbuf():
-            Gtk.drag_set_icon_pixbuf(data, self.icon.get_pixbuf(), 0, 0)
-        else:
-            Gtk.drag_set_icon_gicon(data, self.icon.get_gicon()[0], 0, 0)
-        if self.initial != 1:
-            pass
-        #self.icon.clear()
-
+    # TODO: replace to GtkEventControllerKey
     def key_press_event(self, _a, event_key):
         if event_key.keyval == Gdk.KEY_Escape:
             self.close()

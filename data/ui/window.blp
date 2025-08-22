@@ -1,26 +1,25 @@
 using Gtk 4.0;
+using Adw 1;
 
-template PydropWindow : .AdwApplicationWindow {
-  visible: "True";
-  can-focus: "False";
+template $PydropWindow : Adw.ApplicationWindow {
+  visible: true;
+  can-focus: false;
   title: _("PyDrop");
-  default-width: "220";
-  default-height: "225";
+  default-width: 220;
+  default-height: 225;
 
   Box droparea {
     visible: true;
     can-focus: false;
     orientation: vertical;
 
-    .AdwHeaderBar headerbar {
-      visible: "True";
-      can-focus: "False";
+    Adw.HeaderBar headerbar {
+      visible: true;
+      can-focus: false;
       title-widget: 
-      .AdwWindowTitle {
+      Adw.WindowTitle {
         title: _("PyDrop");
-      }
-
-      ;
+      };
 
       MenuButton menubutton {
         visible: true;
@@ -67,7 +66,7 @@ template PydropWindow : .AdwApplicationWindow {
           }
         }
 
-        Button eventbox {
+        Box eventbox {
           visible: true;
           can-focus: true;
           focus-on-click: false;
@@ -102,6 +101,7 @@ template PydropWindow : .AdwApplicationWindow {
       can-focus: true;
       receives-default: true;
       halign: center;
+      margin-bottom: 10;
     }
   }
 }

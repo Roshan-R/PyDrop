@@ -18,23 +18,27 @@
 import sys
 
 import gi
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Gio, Gdk, GLib, Adw
 
 from .window import PydropWindow
 
+
 class Application(Gtk.Application):
     def __init__(self):
-        super().__init__(application_id='com.github.Roshan_R.PyDrop',
-                         flags=Gio.ApplicationFlags.FLAGS_NONE)
+        super().__init__(
+            application_id="com.github.Roshan_R.PyDrop",
+            flags=Gio.ApplicationFlags.FLAGS_NONE,
+        )
 
-        #css_provider = Gtk.CssProvider()
-        #css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/css/style.css')
-        #Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        # css_provider = Gtk.CssProvider()
+        # css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/css/style.css')
+        # Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-        self.setup_actions()
+        # self.setup_actions()
 
     def do_activate(self):
         win = self.props.active_window
@@ -64,6 +68,7 @@ class Application(Gtk.Application):
         about.set_website_label(_("GitHub"))
         about.set_website("https://github.com/Roshan-R/PyDrop")
         about.present()
+
 
 def main(version):
     app = Application()
