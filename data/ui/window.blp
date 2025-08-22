@@ -3,8 +3,11 @@ using Adw 1;
 
 template $PydropWindow : Adw.ApplicationWindow {
   title: _("PyDrop");
-  default-width: 220;
-  default-height: 225;
+  // TODO: don't hard-code the values
+  default-width: 250;
+  default-height: 250;
+  width-request: 250;
+  resizable: false;
 
   WindowHandle {
 
@@ -35,7 +38,6 @@ template $PydropWindow : Adw.ApplicationWindow {
 
           Box initial_stack {
             orientation: vertical;
-            baseline-position: top;
             margin-bottom: 24;
             vexpand: true;
 
