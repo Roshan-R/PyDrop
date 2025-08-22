@@ -23,27 +23,25 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Gio, Gdk, GLib, Adw
-
 from .window import PydropWindow
 
 
-class Application(Gtk.Application):
+class Application(Adw.Application):
     def __init__(self):
         super().__init__(
             application_id="com.github.Roshan_R.PyDrop",
-            flags=Gio.ApplicationFlags.FLAGS_NONE,
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+            resource_base_path="/com/github/Roshan_R/PyDrop/"
         )
+        action = Gio.SimpleAction(name="about")
+        action.connect("activate", self.show_about_dialog)
+        self.add_action(action)
 
     def do_activate(self):
         win = self.props.active_window
         if not win:
             win = PydropWindow(application=self)
         win.present()
-
-    def setup_actions(self):
-        action = Gio.SimpleAction(name="about")
-        action.connect("activate", self.show_about_dialog)
-        self.add_action(action)
 
     def show_about_dialog(self, action, param):
         about = Gtk.AboutDialog()
