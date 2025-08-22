@@ -6,68 +6,71 @@ template $PydropWindow : Adw.ApplicationWindow {
   default-width: 220;
   default-height: 225;
 
-  Box droparea {
-    orientation: vertical;
+  WindowHandle {
 
-    Adw.HeaderBar headerbar {
-      title-widget: 
-      Adw.WindowTitle {
-        title: _("PyDrop");
-      };
-
-      MenuButton menubutton {
-        icon-name: "open-menu-symbolic";
-        menu-model: menu;
-      }
-
-      styles [
-        "flat",
-      ]
-    }
-
-    Box drag_source {
+    Box droparea {
       orientation: vertical;
 
-      Stack stack {
-        transition-duration: 100;
+      Adw.HeaderBar headerbar {
+        title-widget:
+        Adw.WindowTitle {
+          title: _("PyDrop");
+        };
 
-        Box initial_stack {
-          orientation: vertical;
-          baseline-position: top;
-          margin-bottom: 24;
-          vexpand: true;
+        MenuButton menubutton {
+          icon-name: "open-menu-symbolic";
+          menu-model: menu;
+        }
 
-          Image {
-            pixel-size: 50;
-            valign: center;
+        styles [
+          "flat",
+        ]
+      }
+
+      Box drag_source {
+        orientation: vertical;
+
+        Stack stack {
+          transition-duration: 100;
+
+          Box initial_stack {
+            orientation: vertical;
+            baseline-position: top;
+            margin-bottom: 24;
             vexpand: true;
-            icon-name: "go-jump-symbolic";
+
+            Image {
+              pixel-size: 50;
+              valign: center;
+              vexpand: true;
+              icon-name: "go-jump-symbolic";
+            }
           }
-        }
 
-        Box eventbox {
-          receives-default: true;
-          halign: center;
-          valign: center;
+          Box eventbox {
+            receives-default: true;
+            halign: center;
+            valign: center;
 
-          Image preview_image {
-            pixel-size: 80;
-            use-fallback: true;
+            Image preview_image {
+              pixel-size: 80;
+              use-fallback: true;
+            }
           }
-        }
 
-        Spinner spinner {
-          halign: center;
-          valign: center;
+          Spinner spinner {
+            halign: center;
+            valign: center;
+          }
         }
       }
-    }
 
-    Button button {
-      label: "button";
-      name: "button";
-      halign: center;
-      margin-bottom: 10;
+      Button button {
+        label: "button";
+        name: "button";
+        halign: center;
+        margin-bottom: 10;
+      }
     }
   }
 }
