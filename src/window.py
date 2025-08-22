@@ -34,7 +34,6 @@ from .parsedata import ParseData
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")
 class PydropWindow(Adw.ApplicationWindow):
     __gtype_name__ = "PydropWindow"
-
     Adw.init()
 
     preview_image = Gtk.Template.Child()
@@ -76,6 +75,7 @@ class PydropWindow(Adw.ApplicationWindow):
         target = Gtk.DropTarget(actions=Gdk.DragAction.COPY)
         target.set_gtypes([Gdk.Texture, Gdk.FileList, GObject.TYPE_STRING])
         target.connect("drop", self.on_drop)
+        target.connect("accept", self.on_accept)
         self.droparea.add_controller(target)
 
         self.drag_source = Gtk.DragSource()
@@ -91,7 +91,6 @@ class PydropWindow(Adw.ApplicationWindow):
         if self.initial:
             self.droparea.add_controller(self.drag_source)
             self.initial = False
-
         count, mime_type = self.parser.parse(value, self.link_stack, self.count)
         print(mime_type)
         self.count = count
@@ -99,6 +98,13 @@ class PydropWindow(Adw.ApplicationWindow):
         self.stack.set_visible_child(self.eventbox)
         self.button.set_label(str(self.count) + " Files")
         self.button.set_visible(True)
+
+    def on_accept(self, target, drop):
+        drag = drop.get_drag()
+        # Do no accept DnD operations from the app itself
+        if drag and drag.get_surface() == self.get_surface():
+            return False
+        return True
 
     def on_drag_prepare(self, source, x, y):
         # TODO: just working with files right now
