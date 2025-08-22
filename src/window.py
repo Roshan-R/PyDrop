@@ -57,7 +57,7 @@ class PydropWindow(Adw.ApplicationWindow):
         self.button.hide()
         self.count = 0
         self.link_stack = []
-        self.initial = 1
+        self.initial = True
 
         self.parser = ParseData()
 
@@ -78,14 +78,20 @@ class PydropWindow(Adw.ApplicationWindow):
         target.connect("drop", self.on_drop)
         self.droparea.add_controller(target)
 
-        source = Gtk.DragSource()
-        source.connect("prepare", self.on_drag_prepare)
-        source.connect("drag-begin", self.on_drag_begin)
-        self.droparea.add_controller(source)
+        self.drag_source = Gtk.DragSource()
+        self.drag_source.connect("prepare", self.on_drag_prepare)
+        self.drag_source.connect("drag-begin", self.on_drag_begin)
 
-        # self.connect("key-press-event", self.key_press_event)
+        event_controller_key = Gtk.EventControllerKey()
+        event_controller_key.connect("key-released", self.on_key_release)
+        self.add_controller(event_controller_key)
 
     def on_drop(self, target, value, x, y):
+        # Only add controller to Droparea once something is DnD'd to the app.
+        if self.initial:
+            self.droparea.add_controller(self.drag_source)
+            self.initial = False
+
         count, mime_type = self.parser.parse(value, self.link_stack, self.count)
         print(mime_type)
         self.count = count
@@ -120,7 +126,7 @@ class PydropWindow(Adw.ApplicationWindow):
                 pass
             # self.icon.clear()
 
-    # TODO: replace to GtkEventControllerKey
-    def key_press_event(self, _a, event_key):
-        if event_key.keyval == Gdk.KEY_Escape:
+    # TODO: document this behaviour somewhere
+    def on_key_release(self, event_controller_key, keycode, *args):
+        if keycode == Gdk.KEY_Escape:
             self.close()

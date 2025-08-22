@@ -34,12 +34,6 @@ class Application(Gtk.Application):
             flags=Gio.ApplicationFlags.FLAGS_NONE,
         )
 
-        # css_provider = Gtk.CssProvider()
-        # css_provider.load_from_resource('/com/github/Roshan_R/PyDrop/css/style.css')
-        # Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
-        # self.setup_actions()
-
     def do_activate(self):
         win = self.props.active_window
         if not win:
