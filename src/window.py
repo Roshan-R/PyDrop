@@ -37,7 +37,7 @@ class PydropWindow(Adw.ApplicationWindow):
 
     Adw.init()
 
-    icon = Gtk.Template.Child()
+    preview_image = Gtk.Template.Child()
     droparea = Gtk.Template.Child()
     button = Gtk.Template.Child()
     drag_source = Gtk.Template.Child()
@@ -95,7 +95,7 @@ class PydropWindow(Adw.ApplicationWindow):
         count, mime_type = self.parser.parse(value, self.link_stack, self.count)
         print(mime_type)
         self.count = count
-        tools.set_image(self.link_stack, self.icon, mime_type)
+        tools.set_image(self.link_stack, self.preview_image, mime_type)
         self.stack.set_visible_child(self.eventbox)
         self.button.set_label(str(self.count) + " Files")
         self.button.set_visible(True)
@@ -113,10 +113,10 @@ class PydropWindow(Adw.ApplicationWindow):
         )
 
     def on_drag_begin(self, drag_source, widget):
-        if self.icon.get_gicon():
-            paintable = tools.get_paintable_from_gicon(self.icon.get_gicon())
+        if self.preview_image.get_gicon():
+            paintable = tools.get_paintable_from_gicon(self.preview_image.get_gicon())
         else:
-            paintable = self.icon.get_paintable()
+            paintable = self.preview_image.get_paintable()
         drag_source.set_icon(paintable, 0, 0)
 
     # TODO: document this behaviour somewhere
