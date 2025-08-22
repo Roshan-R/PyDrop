@@ -112,19 +112,12 @@ class PydropWindow(Adw.ApplicationWindow):
             ]
         )
 
-    def on_drag_begin(self, source, widget):
-        # Change drag icon here?
-        print(source, widget)
-
-        def change_drag_icon(self, widget, data):
-            self.dropped = 0
-            if self.icon.get_pixbuf():
-                Gtk.drag_set_icon_pixbuf(data, self.icon.get_pixbuf(), 0, 0)
-            else:
-                Gtk.drag_set_icon_gicon(data, self.icon.get_gicon()[0], 0, 0)
-            if self.initial != 1:
-                pass
-            # self.icon.clear()
+    def on_drag_begin(self, drag_source, widget):
+        if self.icon.get_gicon():
+            paintable = tools.get_paintable_from_gicon(self.icon.get_gicon())
+        else:
+            paintable = self.icon.get_paintable()
+        drag_source.set_icon(paintable, 0, 0)
 
     # TODO: document this behaviour somewhere
     def on_key_release(self, event_controller_key, keycode, *args):

@@ -48,6 +48,11 @@ def is_link(text):
 #            final_filename = icon_file.get_filename()
 #        return final_filename
 
+def get_paintable_from_gicon(gicon):
+    display = Gdk.Display.get_default()
+    icon_theme = Gtk.IconTheme.get_for_display(display)
+    paintable = icon_theme.lookup_by_gicon(gicon, 24, 1, Gtk.TextDirection.NONE, Gtk.IconLookupFlags.NONE)
+    return paintable
 
 def get_desktop(link):
     return f"[Desktop Entry]\nEncoding=UTF-8\nType=Link\nURL={link}\nIcon=text-html"
