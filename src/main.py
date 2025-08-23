@@ -31,7 +31,7 @@ class Application(Adw.Application):
         super().__init__(
             application_id="com.github.Roshan_R.PyDrop",
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
-            resource_base_path="/com/github/Roshan_R/PyDrop/"
+            resource_base_path="/com/github/Roshan_R/PyDrop/",
         )
         action = Gio.SimpleAction(name="about")
         action.connect("activate", self.show_about_dialog)

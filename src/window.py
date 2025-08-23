@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gi
-import os
+import os, shutil
 
 gi.require_version("Adw", "1")
 gi.require_version("Gtk", "4.0")
@@ -26,9 +26,7 @@ from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib
 from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 from .utils import tools
-from .parsedata import ParseData
-
-(TARGET_OCTECT_STREAM, TARGET_PNG, TARGET_URI_LIST, TARGET_PLAIN) = range(4)
+from .parsedata import ParseData, BASE_DIR
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")
@@ -41,7 +39,7 @@ class PydropWindow(Adw.ApplicationWindow):
     button = Gtk.Template.Child()
     drag_source = Gtk.Template.Child()
     stack = Gtk.Template.Child()
-    spinner = Gtk.Template.Child()
+    spinner_box = Gtk.Template.Child()
     eventbox = Gtk.Template.Child()
     # TODO : make iconview
     # iconview = Gtk.Template.Child()
@@ -57,19 +55,11 @@ class PydropWindow(Adw.ApplicationWindow):
         self.count = 0
         self.link_stack = []
         self.initial = True
+        self.parser = ParseData(self.on_download)
 
-        self.parser = ParseData()
-
-        import subprocess
-
-        # TODO : better temporary directory?
-        if not os.path.exists("/tmp/pydrop"):
-            os.mkdir("/tmp/pydrop")
-            out = subprocess.check_output(["ls", "/tmp/pydrop"])
-            print("Output is: ", out)
-        else:
-            out = subprocess.check_output(["ls", "/tmp/pydrop"])
-            print("Already existing Output is: ", out)
+        if os.path.exists(BASE_DIR):
+            shutil.rmtree(BASE_DIR)
+        os.makedirs(BASE_DIR, exist_ok=True)
 
     def setup_signals(self):
         target = Gtk.DropTarget(actions=Gdk.DragAction.COPY)
@@ -86,18 +76,27 @@ class PydropWindow(Adw.ApplicationWindow):
         event_controller_key.connect("key-released", self.on_key_release)
         self.add_controller(event_controller_key)
 
+    def on_download(self):
+        match self.stack.get_visible_child().get_buildable_id():
+            case "initial_stack" | "eventbox":
+                self.stack.set_visible_child(self.spinner_box)
+            case "spinner_box":
+                self.stack.set_visible_child(self.eventbox)
+
     def on_drop(self, target, value, x, y):
         # Only add controller to Droparea once something is DnD'd to the app.
         if self.initial:
             self.droparea.add_controller(self.drag_source)
             self.initial = False
-        count, mime_type = self.parser.parse(value, self.link_stack, self.count)
-        print(mime_type)
-        self.count = count
-        tools.set_image(self.link_stack, self.preview_image, mime_type)
-        self.stack.set_visible_child(self.eventbox)
-        self.button.set_label(str(self.count) + " Files")
-        self.button.set_visible(True)
+            self.stack.set_visible_child(self.eventbox)
+            self.button.set_visible(True)
+
+        def on_parse_complete(count, mime_type):
+            self.count = count
+            self.button.set_label(f"{self.count} Files")
+            tools.set_image(self.link_stack, self.preview_image, mime_type)
+
+        self.parser.parse(value, self.link_stack, self.count, on_parse_complete)
 
     def on_accept(self, target, drop):
         drag = drop.get_drag()

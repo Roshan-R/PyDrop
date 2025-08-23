@@ -51,28 +51,40 @@ template $PydropWindow : Adw.ApplicationWindow {
           }
 
           Box eventbox {
-            receives-default: true;
             halign: center;
             valign: center;
+            orientation: vertical;
 
             Image preview_image {
-              pixel-size: 80;
+              pixel-size: 150;
               use-fallback: true;
+            }
+            Button button {
+              label: "button";
+              name: "button";
+              halign: center;
+              margin-bottom: 10;
             }
           }
 
-          Spinner spinner {
-            halign: center;
-            valign: center;
+          Box spinner_box {
+            orientation: vertical;
+            margin-bottom: 24;
+            vexpand: true;
+
+            Adw.Spinner spinner {
+              halign: center;
+              valign: center;
+              width-request: 48;
+              height-request: 48;
+              vexpand: true;
+          }
+            Label{
+              label: _("<b>Downloading</b>");
+              use-markup: true;
+            }
           }
         }
-      }
-
-      Button button {
-        label: "button";
-        name: "button";
-        halign: center;
-        margin-bottom: 10;
       }
     }
   }

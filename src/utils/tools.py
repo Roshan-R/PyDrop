@@ -6,7 +6,7 @@ from urllib.parse import unquote
 import gi
 
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gio, Gtk, Gdk
+from gi.repository import Gio, Gtk, Gdk, GLib
 from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 
@@ -20,6 +20,8 @@ def link_is_image(link):
     link = link.strip()
     image_formats = ["image/png", "image/jpeg", "image/jpg"]
     r = requests.head(link)
+    if not r.ok:
+        return False
     if r.headers["content-type"] in image_formats:
         return True
     return False
@@ -48,11 +50,15 @@ def is_link(text):
 #            final_filename = icon_file.get_filename()
 #        return final_filename
 
+
 def get_paintable_from_gicon(gicon):
     display = Gdk.Display.get_default()
     icon_theme = Gtk.IconTheme.get_for_display(display)
-    paintable = icon_theme.lookup_by_gicon(gicon, 24, 1, Gtk.TextDirection.NONE, Gtk.IconLookupFlags.NONE)
+    paintable = icon_theme.lookup_by_gicon(
+        gicon, 24, 1, Gtk.TextDirection.NONE, Gtk.IconLookupFlags.NONE
+    )
     return paintable
+
 
 def get_desktop(link):
     return f"[Desktop Entry]\nEncoding=UTF-8\nType=Link\nURL={link}\nIcon=text-html"
@@ -67,16 +73,16 @@ def new_set_image(link_stack: list, icon: Gtk.Widget):
     pass
 
 
-def set_image(link_stack, icon, a):
+def set_image(link_stack, image_widget, mime_type):
     file_path = unquote(link_stack[-1])
     # TODO: make use of themed icon for better consistency
     try:
         pixbuf = Pixbuf.new_from_file_at_scale(
             file_path, pixbuf_size, pixbuf_size, True
         )
-        icon.set_from_pixbuf(pixbuf)
+        image_widget.set_from_pixbuf(pixbuf)
     except:
-        icon.set_from_gicon(Gio.content_type_get_icon(a))
+        image_widget.set_from_gicon(Gio.content_type_get_icon(mime_type))
     # icon_path = None
     # icon_path = get_thumbnail(file_path)
     # print(file_path, icon_path, a)
@@ -105,16 +111,6 @@ def set_image(link_stack, icon, a):
     #    icon.set_from_pixbuf(pixbuf)
 
 
-def download_image(link, link_stack, count):
-    # TODO: make the download another thread
-
-    print(link)
-    print("Starting download...")
-    r = requests.get(link)
-
-    extension = r.headers["content-type"].split("/")[1]
-    file_path = f"/tmp/pydrop/{count}.{extension}"
-
-    with open(file_path, "wb") as f:
-        f.write(r.content)
-    link_stack.append(f"file://{file_path}")
+def generate_file_path(count, extension):
+    BASE_DIR = GLib.get_user_cache_dir() + "/pydrop"
+    return f"{BASE_DIR}/{count}.{extension}"
