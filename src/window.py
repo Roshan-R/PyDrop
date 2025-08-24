@@ -23,7 +23,6 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
 
 from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib
-from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
 
 from .utils import tools
 from .parsedata import ParseData, BASE_DIR
@@ -51,7 +50,6 @@ class PydropWindow(Adw.ApplicationWindow):
         self.setup_signals()
 
     def setup_variables(self):
-        self.button.hide()
         self.count = 0
         self.link_stack = []
         self.initial = True
@@ -86,10 +84,9 @@ class PydropWindow(Adw.ApplicationWindow):
     def on_drop(self, target, value, x, y):
         # Only add controller to Droparea once something is DnD'd to the app.
         if self.initial:
-            self.droparea.add_controller(self.drag_source)
             self.initial = False
+            self.droparea.add_controller(self.drag_source)
             self.stack.set_visible_child(self.eventbox)
-            self.button.set_visible(True)
 
         def on_parse_complete(count, mime_type):
             self.count = count
