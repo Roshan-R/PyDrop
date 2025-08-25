@@ -20,7 +20,7 @@ def get_paintable_from_gicon(gicon):
     display = Gdk.Display.get_default()
     icon_theme = Gtk.IconTheme.get_for_display(display)
     paintable = icon_theme.lookup_by_gicon(
-        gicon, 24, 1, Gtk.TextDirection.NONE, Gtk.IconLookupFlags.NONE
+        gicon, 150, 1, Gtk.TextDirection.NONE, Gtk.IconLookupFlags.NONE
     )
     return paintable
 

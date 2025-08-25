@@ -119,7 +119,7 @@ class PydropWindow(Adw.ApplicationWindow):
             paintable = tools.get_paintable_from_gicon(self.preview_image.get_gicon())
         else:
             paintable = self.preview_image.get_paintable()
-        drag_source.set_icon(paintable, 0, 0)
+        drag_source.set_icon(paintable, 75, 75)
 
     # TODO: document this behaviour somewhere
     def on_key_release(self, event_controller_key, keycode, *args):
