@@ -15,17 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from .parsedata import ParseData, BASE_DIR
+from .utils import tools
 import gi
-import os, shutil
+import os
+import shutil
 
 gi.require_version("Adw", "1")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
 
-from gi.repository import Gtk, Gdk, Adw, GObject, GLib
-
-from .utils import tools
-from .parsedata import ParseData, BASE_DIR
+from gi.repository import Gtk, Gdk, Adw, GObject, GLib  # noqa
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")

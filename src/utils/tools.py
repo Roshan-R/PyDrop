@@ -29,57 +29,31 @@ def get_desktop(link):
     return f"[Desktop Entry]\nEncoding=UTF-8\nType=Link\nURL={link}\nIcon=text-html"
 
 
-def get_file_icon(filepath):
-    """
-    Retrieves the standard icon for a given file path.
-
-    Args:
-        filepath (str): The path to the file.
-
-    Returns:
-        Gio.Icon or None: The GIcon object representing the file's icon,
-                          or None if no icon can be retrieved.
-    """
-    try:
-        file = Gio.File.new_for_path(filepath)
-        # Query for the standard icon attribute
-        info = file.query_info(
-            Gio.FILE_ATTRIBUTE_STANDARD_ICON, Gio.FileQueryInfoFlags.NONE, None
-        )
-        if info:
-            icon = info.get_attribute_object(Gio.FILE_ATTRIBUTE_STANDARD_ICON)
-            return icon
-    except Exception as e:
-        print(f"Error getting icon for {filepath}: {e}")
-    return None
-
-
 def set_image(link_stack, image_widget, mime_type=None):
     """
-    Sets the image or icon on the provided image widget.
-
-    If a MIME type is specified, the corresponding icon for that MIME type is
-    used.
-
-    Otherwise, the function attempts to load the image at the top of the link
-    stack using GdkPixbuf. If that fails (e.g. the file is not a supported
-    image), it queries the file's information and derives an appropriate icon
-    using the helper function `get_file_icon()`, which inspects the file
-    metadata to choose a suitable icon.
+    Sets an appropriate image or icon on the provided image widget based on
+    the MIME type or file content.
     """
     if mime_type:
         image_widget.set_from_gicon(Gio.content_type_get_icon(mime_type))
         return
     file_path = unquote(link_stack[-1])
-    try:
+    file = Gio.File.new_for_path(file_path)
+    info = file.query_info(
+        ",".join(
+            [Gio.FILE_ATTRIBUTE_STANDARD_ICON, Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE]
+        ),
+        Gio.FileQueryInfoFlags.NONE,
+        None,
+    )
+    content_type = info.get_content_type()
+    if content_type.split("/")[0] == "image":
         pixbuf = Pixbuf.new_from_file_at_scale(
             file_path, pixbuf_size, pixbuf_size, True
         )
         image_widget.set_from_pixbuf(pixbuf)
-    # TODO: get the file info and then do this instead of an exception.
-    # i.e merge the two funcs
-    except GError:
-        icon = get_file_icon(file_path)
+    else:
+        icon = info.get_attribute_object(Gio.FILE_ATTRIBUTE_STANDARD_ICON)
         image_widget.set_from_gicon(icon)
 
 

@@ -13,6 +13,7 @@ google_re = re.compile(
 BASE_DIR = GLib.get_user_cache_dir() + "/pydrop"
 chunk_size = 4096
 
+
 class ParseData(GObject.Object):
     def __init__(self, toggle_download_func):
         self.toggle_download_func = toggle_download_func
