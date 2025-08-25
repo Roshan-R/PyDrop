@@ -4,20 +4,6 @@
     "build-commands": [],
     "modules": [
         {
-            "name": "python3-python-magic",
-            "buildsystem": "simple",
-            "build-commands": [
-                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"python-magic\" --no-build-isolation"
-            ],
-            "sources": [
-                {
-                    "type": "file",
-                    "url": "https://files.pythonhosted.org/packages/6c/73/9f872cb81fc5c3bb48f7227872c28975f998f3e7c2b1c16e95e6432bbb90/python_magic-0.4.27-py2.py3-none-any.whl",
-                    "sha256": "c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3"
-                }
-            ]
-        },
-        {
             "name": "python3-validators",
             "buildsystem": "simple",
             "build-commands": [

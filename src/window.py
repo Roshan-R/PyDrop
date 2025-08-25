@@ -85,10 +85,10 @@ class PydropWindow(Adw.ApplicationWindow):
         # Only add controller to Droparea once something is DnD'd to the app.
         if self.initial:
             self.initial = False
-            self.droparea.add_controller(self.drag_source)
+            self.eventbox.add_controller(self.drag_source)
             self.stack.set_visible_child(self.eventbox)
 
-        def on_parse_complete(count, mime_type):
+        def on_parse_complete(count, mime_type = None):
             self.count = count
             self.button.set_label(f"{self.count} Files")
             tools.set_image(self.link_stack, self.preview_image, mime_type)

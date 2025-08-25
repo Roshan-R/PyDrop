@@ -54,8 +54,32 @@ def new_set_image(link_stack: list, icon: Gtk.Widget):
 
     pass
 
+def get_file_icon(filepath):
+    """
+    Retrieves the standard icon for a given file path.
 
-def set_image(link_stack, image_widget, mime_type):
+    Args:
+        filepath (str): The path to the file.
+
+    Returns:
+        Gio.Icon or None: The GIcon object representing the file's icon,
+                          or None if no icon can be retrieved.
+    """
+    try:
+        file = Gio.File.new_for_path(filepath)
+        # Query for the standard icon attribute
+        info = file.query_info(Gio.FILE_ATTRIBUTE_STANDARD_ICON, Gio.FileQueryInfoFlags.NONE, None)
+        if info:
+            icon = info.get_attribute_object(Gio.FILE_ATTRIBUTE_STANDARD_ICON)
+            return icon
+    except Exception as e:
+        print(f"Error getting icon for {filepath}: {e}")
+    return None
+
+def set_image(link_stack, image_widget, mime_type = None):
+    if mime_type:
+        image_widget.set_from_gicon(Gio.content_type_get_icon(mime_type))
+        return
     file_path = unquote(link_stack[-1])
     # TODO: make use of themed icon for better consistency
     try:
@@ -64,7 +88,8 @@ def set_image(link_stack, image_widget, mime_type):
         )
         image_widget.set_from_pixbuf(pixbuf)
     except:
-        image_widget.set_from_gicon(Gio.content_type_get_icon(mime_type))
+        icon = get_file_icon(file_path)
+        image_widget.set_from_gicon(icon)
     # icon_path = None
     # icon_path = get_thumbnail(file_path)
     # print(file_path, icon_path, a)

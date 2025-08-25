@@ -1,14 +1,10 @@
-(TARGET_OCTECT_STREAM, TARGET_PNG, TARGET_URI_LIST, TARGET_PLAIN) = range(4)
-
-
-import magic
 from urllib.parse import unquote
 from .utils import tools
 import re
 import gi
 
 gi.require_version("Soup", "3.0")
-from gi.repository import Gdk, GObject, GLib, Soup
+from gi.repository import Gdk, GObject, GLib, Soup, Gio
 
 google_re = re.compile(
     r"[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
@@ -21,7 +17,6 @@ class ParseData(GObject.Object):
     def __init__(self, toggle_download_func):
         self.toggle_download_func = toggle_download_func
         self.soup = Soup.Session()
-        self.mime = magic.Magic(mime=True)
         super().__init__()
 
     def parse(self, value, link_stack, count, callback):
@@ -45,19 +40,14 @@ class ParseData(GObject.Object):
         for file in file_list.get_files():
             self.link_stack.append(file.get_path())
             self.count += 1
-            # TODO: fix this logic with the for loop
-            try:
-                mime_type = self.mime.from_file(file.get_path())
-            except IsADirectoryError:
-                mime_type = "inode/directory"
-            callback(self.count, mime_type)
+            callback(self.count)
 
     def handle_memory_texture(self, memory_texture, callback):
         file_path = tools.generate_file_path(self.count, "png")
         memory_texture.save_to_png(file_path)
         self.link_stack.append(file_path)
         self.count += 1
-        callback(self.count, "image")
+        callback(self.count)
 
     def handle_text(self, text, callback):
         if tools.is_link(text):
@@ -71,8 +61,7 @@ class ParseData(GObject.Object):
         with open(f"{file_path}", "w+") as f:
             f.write(text)
         self.link_stack.append(file_path)
-        mime = "text/plain"
-        callback(self.count, mime)
+        callback(self.count)
 
     def handle_link(self, link):
         self.link = link
@@ -128,7 +117,7 @@ class ParseData(GObject.Object):
         print("Finished download")
         self.link_stack.append(file_path)
         self.toggle_download_func()
-        self.callback(self.count, "image")
+        self.callback(self.count)
 
     def handle_normal_link(self):
         file_path = f"{BASE_DIR}/{self.count}.desktop"
