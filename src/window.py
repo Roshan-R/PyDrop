@@ -88,7 +88,7 @@ class PydropWindow(Adw.ApplicationWindow):
             self.eventbox.add_controller(self.drag_source)
             self.stack.set_visible_child(self.eventbox)
 
-        def on_parse_complete(count, mime_type = None):
+        def on_parse_complete(count, mime_type=None):
             self.count = count
             self.button.set_label(f"{self.count} Files")
             tools.set_image(self.link_stack, self.preview_image, mime_type)
