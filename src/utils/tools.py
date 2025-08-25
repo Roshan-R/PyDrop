@@ -64,7 +64,7 @@ def get_desktop(link):
     return f"[Desktop Entry]\nEncoding=UTF-8\nType=Link\nURL={link}\nIcon=text-html"
 
 
-pixbuf_size = 80
+pixbuf_size = 150
 
 
 def new_set_image(link_stack: list, icon: Gtk.Widget):

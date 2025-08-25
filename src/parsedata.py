@@ -25,10 +25,6 @@ class ParseData(GObject.Object):
         self.soup = Soup.Session()
         super().__init__()
 
-    __gsignals__ = {
-        "toggle-download": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-    }
-
     def download_image(self, link, link_stack, count, callback):
         # TODO: make the download another thread
         self.toggle_download_func()
@@ -74,6 +70,7 @@ class ParseData(GObject.Object):
                 callback(count, mime)
             case Gdk.MemoryTexture():
                 file_name = BASE_DIR + f"/{count}.png"
+                # TODO: make this faster for large files
                 value.save_to_png(file_name)
                 link_stack.append(file_name)
                 count += 1
