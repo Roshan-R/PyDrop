@@ -11,7 +11,7 @@ google_re = re.compile(
 )
 
 BASE_DIR = GLib.get_user_cache_dir() + "/pydrop"
-
+chunk_size = 4096
 
 class ParseData(GObject.Object):
     def __init__(self, toggle_download_func):
@@ -82,42 +82,39 @@ class ParseData(GObject.Object):
             "User-Agent",
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         )
-        self.soup.send_async(self.message, 1, None, self.on_reponse_headers)
+        self.soup.send_async(
+            self.message, GLib.PRIORITY_DEFAULT, None, self.on_reponse_headers
+        )
 
     def on_reponse_headers(self, session, task):
         # TODO: fail when the response is zero
         headers = self.message.get_response_headers()
         content_type, _ = headers.get_content_type()
-        print(content_type)
-        if content_type in ["image/png", "image/jpeg", "image/jpg"]:
-            self.extension = content_type.split("/")[-1]
-            self.download_image()
-        else:
+        if content_type not in ["image/png", "image/jpeg", "image/jpg"]:
             self.handle_normal_link()
-
-    def download_image(self):
-        # TODO: make the download another thread
+            return
+        self.extension = content_type.split("/")[-1]
+        input_stream = session.send_finish(task)
         self.toggle_download_func()
-        print("Starting download...", self.link)
-        self.message = Soup.Message.new("GET", self.link)
-        self.message.get_request_headers().append(
-            "User-Agent",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        buffer = bytearray()
+        input_stream.read_bytes_async(
+            chunk_size, GLib.PRIORITY_DEFAULT, None, self.on_read_callback, buffer
         )
-        self.soup.send_and_read_async(self.message, 1, None, self.on_response)
 
-    def on_response(self, session, task):
-        if self.message.get_status() != 200:
-            # Do something when the request failed
-            pass
-        data = session.send_and_read_finish(task)
-        file_path = tools.generate_file_path(self.count, self.extension)
-        with open(file_path, "wb") as f:
-            f.write(data.get_data())
-        print("Finished download")
-        self.link_stack.append(file_path)
-        self.toggle_download_func()
-        self.callback(self.count)
+    def on_read_callback(self, input_stream, task, buffer):
+        data = input_stream.read_bytes_finish(task)
+        if data.get_size():
+            buffer.extend(data.get_data())
+            input_stream.read_bytes_async(
+                chunk_size, GLib.PRIORITY_DEFAULT, None, self.on_read_callback, buffer
+            )
+        else:
+            file_path = tools.generate_file_path(self.count, self.extension)
+            with open(file_path, "wb") as f:
+                f.write(bytes(buffer))
+            self.link_stack.append(file_path)
+            self.toggle_download_func()
+            self.callback(self.count)
 
     def handle_normal_link(self):
         file_path = f"{BASE_DIR}/{self.count}.desktop"
