@@ -1,4 +1,5 @@
 # Maintainer: Roshan R Chandar <roshanr2001@gmail.com>
+# TODO: update the PKGBUILD
 
 pkgver=1.0
 pkgname=PyDrop

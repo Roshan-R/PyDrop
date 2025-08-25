@@ -5,12 +5,10 @@ import magic
 from urllib.parse import unquote
 from .utils import tools
 import re
-from PIL import Image
-import io
 import gi
 
 gi.require_version("Soup", "3.0")
-from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib, Soup
+from gi.repository import Gdk, GObject, GLib, Soup
 
 google_re = re.compile(
     r"[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
@@ -23,90 +21,119 @@ class ParseData(GObject.Object):
     def __init__(self, toggle_download_func):
         self.toggle_download_func = toggle_download_func
         self.soup = Soup.Session()
+        self.mime = magic.Magic(mime=True)
         super().__init__()
 
-    def download_image(self, link, link_stack, count, callback):
-        # TODO: make the download another thread
-        self.toggle_download_func()
-        print("Starting download...", link)
-        self.message = Soup.Message.new("GET", link)
+    def parse(self, value, link_stack, count, callback):
+        self.link_stack = link_stack
+        self.callback = callback
+        self.count = count
+
+        match value:
+            case Gdk.FileList():
+                self.handle_file_list(value, callback)
+            case Gdk.MemoryTexture():
+                self.handle_memory_texture(value, callback)
+            case str():
+                # TODO: better count handling
+                self.count += 1
+                self.handle_text(value, callback)
+            case _:
+                print("Default", type(value), value)
+
+    def handle_file_list(self, file_list: Gdk.FileList, callback):
+        for file in file_list.get_files():
+            self.link_stack.append(file.get_path())
+            self.count += 1
+            # TODO: fix this logic with the for loop
+            try:
+                mime_type = self.mime.from_file(file.get_path())
+            except IsADirectoryError:
+                mime_type = "inode/directory"
+            callback(self.count, mime_type)
+
+    def handle_memory_texture(self, memory_texture, callback):
+        file_path = tools.generate_file_path(self.count, "png")
+        memory_texture.save_to_png(file_path)
+        self.link_stack.append(file_path)
+        self.count += 1
+        callback(self.count, "image")
+
+    def handle_text(self, text, callback):
+        if tools.is_link(text):
+            self.handle_link(text)
+        else:
+            self.write_to_text_file(text, callback)
+
+    def write_to_text_file(self, text, callback):
+        first_word = text.split()[0]
+        file_path = tools.generate_file_path(first_word, "txt")
+        with open(f"{file_path}", "w+") as f:
+            f.write(text)
+        self.link_stack.append(file_path)
+        mime = "text/plain"
+        callback(self.count, mime)
+
+    def handle_link(self, link):
+        self.link = link
+        x = google_re.findall(self.link)
+        if x:
+            self.link = unquote(x[0])
+            print("this is a google image : ", self.link)
+            print("Google image link : ", self.link)
+            self.download_image(self.link, link_stack, count, callback)
+        else:
+            self.download_if_image_else_create_desktop_file()
+
+    def download_if_image_else_create_desktop_file(
+        self,
+    ):
+        self.message = Soup.Message.new("GET", self.link)
         self.message.get_request_headers().append(
             "User-Agent",
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         )
-        self.soup.send_and_read_async(
-            self.message, 1, None, self.on_response, (link_stack, count, callback)
-        )
+        self.soup.send_async(self.message, 1, None, self.on_reponse_headers)
 
-    def on_response(self, session, task, params):
-        link_stack, count, callback = params
+    def on_reponse_headers(self, session, task):
+        # TODO: fail when the response is zero
+        headers = self.message.get_response_headers()
+        content_type, _ = headers.get_content_type()
+        print(content_type)
+        if content_type in ["image/png", "image/jpeg", "image/jpg"]:
+            self.extension = content_type.split("/")[-1]
+            self.download_image()
+        else:
+            self.handle_normal_link()
+
+    def download_image(self):
+        # TODO: make the download another thread
+        self.toggle_download_func()
+        print("Starting download...", self.link)
+        self.message = Soup.Message.new("GET", self.link)
+        self.message.get_request_headers().append(
+            "User-Agent",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        )
+        self.soup.send_and_read_async(self.message, 1, None, self.on_response)
+
+    def on_response(self, session, task):
         if self.message.get_status() != 200:
             # Do something when the request failed
             pass
-        # get png from image/png
-        headers = self.message.get_response_headers()
-        extension = headers.get_content_type()[0].split("/")[-1]
         data = session.send_and_read_finish(task)
-        file_path = tools.generate_file_path(count, extension)
+        file_path = tools.generate_file_path(self.count, self.extension)
         with open(file_path, "wb") as f:
             f.write(data.get_data())
         print("Finished download")
-        link_stack.append(file_path)
+        self.link_stack.append(file_path)
         self.toggle_download_func()
-        callback(count, "image")
+        self.callback(self.count, "image")
 
-    def parse(self, value, link_stack, count, callback):
-        match value:
-            case Gdk.FileList():
-                # print(type(value), [f.get_path() for f in value.get_files()])
-                for file in value.get_files():
-                    link_stack.append(file.get_path())
-                    count += 1
-                    mime = magic.Magic(mime=True)
-                try:
-                    mime = mime.from_file(file.get_path())
-                except IsADirectoryError:
-                    mime = "inode/directory"
-                callback(count, mime)
-            case Gdk.MemoryTexture():
-                file_name = BASE_DIR + f"/{count}.png"
-                # TODO: make this faster for large files
-                value.save_to_png(file_name)
-                link_stack.append(file_name)
-                count += 1
-                mime = "image"
-                callback(count, mime)
-            case str():
-                count += 1
-                text = value
-                if tools.is_link(text):
-                    link = text
-                    x = google_re.findall(link)
-                    if x:
-                        link = unquote(x[0])
-                        print("this is a google image : ", link)
-                        print("Google image link : ", link)
-                        self.download_image(link, link_stack, count, callback)
-                    elif tools.link_is_image(link):
-                        print("The link is an image", link)
-                        self.download_image(link, link_stack, count, callback)
-                    else:
-                        # TODO: handle link better, preferably make a file that contains the link?
-                        # investigate on which filetype to use
-                        file_path = f"{BASE_DIR}/{count}.desktop"
-                        with open(file_path, "w+") as f:
-                            f.write(tools.get_desktop(link))
-                            link_stack.append(file_path)
-                        mime = "text/html"
-                        callback(count, mime)
-                else:
-                    print("Got text")
-                    file_name = f"{text.split()[0]}.txt"
-                    file_path = f"{BASE_DIR}/{file_name}"
-                    with open(f"{file_path}", "w+") as f:
-                        f.write(text)
-                    link_stack.append(file_path)
-                    mime = "text/plain"
-                    callback(count, mime)
-            case _:
-                print("Default", type(value), value)
+    def handle_normal_link(self):
+        file_path = f"{BASE_DIR}/{self.count}.desktop"
+        with open(file_path, "w+") as f:
+            f.write(tools.get_desktop(self.link))
+            self.link_stack.append(file_path)
+        mime = "text/html"
+        self.callback(self.count, mime)

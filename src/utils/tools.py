@@ -1,5 +1,4 @@
 import validators
-import requests
 import os
 from urllib.parse import unquote
 
@@ -8,23 +7,6 @@ import gi
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, Gtk, Gdk, GLib
 from gi.repository.GdkPixbuf import Pixbuf, PixbufLoader
-
-
-def link_is_image(link):
-    """ "
-    returns True is link is an image
-    else False
-
-    https://stackoverflow.com/questions/10543940/check-if-a-url-to-an-image-is-up-and-exists-in-python
-    """
-    link = link.strip()
-    image_formats = ["image/png", "image/jpeg", "image/jpg"]
-    r = requests.head(link)
-    if not r.ok:
-        return False
-    if r.headers["content-type"] in image_formats:
-        return True
-    return False
 
 
 def is_link(text):
