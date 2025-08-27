@@ -3,7 +3,7 @@ from urllib.parse import unquote
 import gi
 
 gi.require_version("Gtk", "4.0")  # noqa
-from gi.repository import Gio, Gtk, Gdk, GLib  # noqa
+from gi.repository import Gio, Gtk, Gdk, GLib, Gsk  # noqa
 from gi.repository.GdkPixbuf import Pixbuf
 from gi.repository.Graphene import Point
 from gi.repository.Gdk import Texture
@@ -35,6 +35,14 @@ def create_overlayed_paintable(current_p, new_p):
     width, height = pixbuf_size, pixbuf_size
     snapshot = Gtk.Snapshot.new()
 
+    # Add shadow to the element
+    shadow = Gsk.Shadow()
+    shadow.color = Gdk.RGBA(0, 0, 0, 0.4)  # semi-transparent black
+    shadow.dx = 2
+    shadow.dy = 2
+    shadow.radius = 6
+    snapshot.push_shadow([shadow])
+
     if current_p:
         snapshot.translate(Point().alloc().init(75, 75))
         snapshot.rotate(-5)
@@ -44,7 +52,6 @@ def create_overlayed_paintable(current_p, new_p):
         current_p.snapshot(snapshot, width, height)
 
     new_p.snapshot(snapshot, width, height)
-
     return snapshot.to_paintable()
 
 
