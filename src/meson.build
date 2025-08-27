@@ -26,6 +26,7 @@ pydrop_sources = [
   'main.py',
   'window.py',
   'parsedata.py',
+  'dropped_item.py'
 ]
 
 install_data(pydrop_sources, install_dir: moduledir)

@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .parsedata import ParseData, BASE_DIR
+from .dropped_item import DroppedItem
 from .utils import tools
+from .parsedata import ParseData, BASE_DIR
 import gi
 import os
 import shutil
@@ -51,7 +52,7 @@ class PydropWindow(Adw.ApplicationWindow):
 
     def setup_variables(self):
         self.count = 0
-        self.link_stack = []
+        self.dropped_items: list[DroppedItem] = []
         self.initial = True
         self.parser = ParseData(self.on_download)
 
@@ -82,7 +83,7 @@ class PydropWindow(Adw.ApplicationWindow):
                 self.stack.set_visible_child(self.eventbox)
 
     def on_drop(self, target, value, x, y):
-        self.parser.parse(value, self.link_stack, self.count, self.on_parse_complete)
+        self.parser.parse(value, self.dropped_items, self.count, self.on_parse_complete)
 
     def on_parse_complete(self, count, mime_type=None):
         # Only add controller to Droparea once something is DnD'd to the app.
@@ -93,7 +94,7 @@ class PydropWindow(Adw.ApplicationWindow):
 
         self.count = count
         self.button.set_label(f"{self.count} Files")
-        tools.set_image(self.link_stack, self.preview_image, mime_type)
+        tools.set_image(self.dropped_items, self.preview_image, mime_type)
 
     def on_accept(self, target, drop):
         drag = drop.get_drag()
@@ -105,7 +106,7 @@ class PydropWindow(Adw.ApplicationWindow):
     def on_drag_prepare(self, source, x, y):
         # TODO: just working with files right now
         # Took from: https://github.com/mijorus/collector/blob/master/src/window.py
-        uri_list = "\n".join([f"file://{f}" for f in self.link_stack])
+        uri_list = "\n".join([f"file://{f.file_path}" for f in self.dropped_items])
         return Gdk.ContentProvider.new_union(
             [
                 Gdk.ContentProvider.new_for_bytes(

@@ -1,10 +1,11 @@
 from urllib.parse import unquote
 from .utils import tools
+from .dropped_item import DroppedItem
 import re
 import gi
 
 gi.require_version("Soup", "3.0")
-from gi.repository import Gdk, GObject, GLib, Soup, Gio
+from gi.repository import Gdk, GObject, GLib, Soup  # noqa
 
 google_re = re.compile(
     r"[http|https]:\/\/www.google.com\/imgres\?imgurl=(.*)\&imgrefurl"
@@ -20,8 +21,8 @@ class ParseData(GObject.Object):
         self.soup = Soup.Session()
         super().__init__()
 
-    def parse(self, value, link_stack, count, callback):
-        self.link_stack = link_stack
+    def parse(self, value, dropped_items, count, callback):
+        self.dropped_items = dropped_items
         self.callback = callback
         self.count = count
 
@@ -39,14 +40,17 @@ class ParseData(GObject.Object):
 
     def handle_file_list(self, file_list: Gdk.FileList, callback):
         for file in file_list.get_files():
-            self.link_stack.append(file.get_path())
+            # TODO: error handling if file path did not run correctly
+            file_path = file.get_path()
+            self.dropped_items.append(DroppedItem(file_path))
             self.count += 1
             callback(self.count)
 
     def handle_memory_texture(self, memory_texture, callback):
         file_path = tools.generate_file_path(self.count, "png")
         memory_texture.save_to_png(file_path)
-        self.link_stack.append(file_path)
+        paintable = memory_texture.get_current_image()
+        self.dropped_items.append(DroppedItem(file_path), paintable)
         self.count += 1
         callback(self.count)
 
@@ -61,7 +65,7 @@ class ParseData(GObject.Object):
         file_path = tools.generate_file_path(first_word, "txt")
         with open(f"{file_path}", "w+") as f:
             f.write(text)
-        self.link_stack.append(file_path)
+        self.dropped_items.append(DroppedItem(file_path))
         callback(self.count)
 
     def handle_link(self, link):
@@ -71,7 +75,9 @@ class ParseData(GObject.Object):
             self.link = unquote(x[0])
             print("this is a google image : ", self.link)
             print("Google image link : ", self.link)
-            self.download_image(self.link, link_stack, count, callback)
+            # self.download_image(self.link, link_stack, count, callback)
+            # TODO: check if this will work
+            self.download_if_image_else_create_desktop_file()
         else:
             self.download_if_image_else_create_desktop_file()
 
@@ -113,7 +119,8 @@ class ParseData(GObject.Object):
             file_path = tools.generate_file_path(self.count, self.extension)
             with open(file_path, "wb") as f:
                 f.write(bytes(buffer))
-            self.link_stack.append(file_path)
+            # TODO: generate paintable from here itself
+            self.dropped_items.append(DroppedItem(file_path))
             self.toggle_download_func()
             self.callback(self.count)
 
@@ -121,6 +128,6 @@ class ParseData(GObject.Object):
         file_path = f"{BASE_DIR}/{self.count}.desktop"
         with open(file_path, "w+") as f:
             f.write(tools.get_desktop(self.link))
-            self.link_stack.append(file_path)
+            self.dropped_items.append(DroppedItem(file_path))
         mime = "text/html"
         self.callback(self.count, mime)

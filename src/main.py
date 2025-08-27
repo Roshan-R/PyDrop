@@ -15,15 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from .window import PydropWindow
 import sys
-
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Gdk, GLib, Adw
-from .window import PydropWindow
+from gi.repository import Gtk, Gio, Adw  # noqa
 
 
 class Application(Adw.Application):

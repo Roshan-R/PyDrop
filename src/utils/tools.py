@@ -1,12 +1,9 @@
 import validators
-from urllib.parse import unquote
 import gi
 
 gi.require_version("Gtk", "4.0")  # noqa
-from gi.repository import Gio, Gtk, Gdk, GLib, Gsk  # noqa
-from gi.repository.GdkPixbuf import Pixbuf
+from gi.repository import Gtk, Gdk, GLib, Gsk  # noqa
 from gi.repository.Graphene import Point
-from gi.repository.Gdk import Texture
 
 
 # Instead of hardcoding the value, get it from the image_widget
@@ -30,67 +27,46 @@ def get_desktop(link):
     return f"[Desktop Entry]\nEncoding=UTF-8\nType=Link\nURL={link}\nIcon=text-html"
 
 
-def create_overlayed_paintable(current_p, new_p):
+def create_overlayed_paintable(dropped_items):
     # FIXME: normal images get stretched
     width, height = pixbuf_size, pixbuf_size
     snapshot = Gtk.Snapshot.new()
-
-    # Add shadow to the element
     shadow = Gsk.Shadow()
     shadow.color = Gdk.RGBA(0, 0, 0, 0.4)  # semi-transparent black
     shadow.dx = 2
     shadow.dy = 2
     shadow.radius = 6
+
+    items_count = len(dropped_items)
     snapshot.push_shadow([shadow])
 
-    if current_p:
-        snapshot.translate(Point().alloc().init(75, 75))
-        snapshot.rotate(-5)
-        snapshot.translate(Point().alloc().init(-75, -75))
-        width = current_p.get_intrinsic_width()
-        height = current_p.get_intrinsic_height()
-        current_p.snapshot(snapshot, width, height)
+    # TODO: document how this variable came to
+    rotation_iterable = iter(range((items_count - 1) * 2, -1, -2))
+    for index, dropped_item in enumerate(dropped_items):
+        paintable = dropped_item.paintable
+        width = paintable.get_intrinsic_width()
+        height = paintable.get_intrinsic_height()
 
-    new_p.snapshot(snapshot, width, height)
+        # Rotate the paintable
+        rotation_value = -1 * next(rotation_iterable)
+        snapshot.save()
+        snapshot.translate(Point().alloc().init(75, 75))
+        snapshot.rotate(rotation_value)
+        snapshot.translate(Point().alloc().init(-75, -75))
+        paintable.snapshot(snapshot, width, height)
+        snapshot.restore()
+
+    # Remove the shadow related thing
+    snapshot.pop()
     return snapshot.to_paintable()
 
 
-def set_image(link_stack, image_widget, mime_type=None):
+def set_image(dropped_items, image_widget, mime_type=None):
     """
     Sets an appropriate image or icon on the provided image widget based on
     the MIME type or file content.
     """
-    current_paintable = image_widget.get_paintable()
-    # TODO: cannot get correct icon for .desktop files
-    if mime_type:
-        icon = Gio.content_type_get_icon(mime_type)
-        paintable = get_paintable_from_gicon(icon)
-
-    file_path = unquote(link_stack[-1])
-    file = Gio.File.new_for_path(file_path)
-    info = file.query_info(
-        ",".join(
-            [Gio.FILE_ATTRIBUTE_STANDARD_ICON,
-                Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE]
-        ),
-        Gio.FileQueryInfoFlags.NONE,
-        None,
-    )
-    content_type = info.get_content_type()
-
-    # TODO: does not work in case of some files, like psd
-    # Create a fallback icon
-    if content_type.split("/")[0] == "image":
-        pixbuf = Pixbuf.new_from_file_at_scale(
-            file_path, pixbuf_size, pixbuf_size, True
-        )
-        texture = Texture.new_for_pixbuf(pixbuf)
-        paintable = texture.get_current_image()
-    else:
-        icon = info.get_attribute_object(Gio.FILE_ATTRIBUTE_STANDARD_ICON)
-        paintable = get_paintable_from_gicon(icon)
-
-    final_paintable = create_overlayed_paintable(current_paintable, paintable)
+    final_paintable = create_overlayed_paintable(dropped_items)
     image_widget.set_from_paintable(final_paintable)
 
 
