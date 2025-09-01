@@ -70,6 +70,7 @@ class PydropWindow(Adw.ApplicationWindow):
         self.drag_source = Gtk.DragSource()
         self.drag_source.connect("prepare", self.on_drag_prepare)
         self.drag_source.connect("drag-begin", self.on_drag_begin)
+        self.drag_source.connect("drag-end", self.on_drag_end)
 
         event_controller_key = Gtk.EventControllerKey()
         event_controller_key.connect("key-released", self.on_key_release)
@@ -197,6 +198,9 @@ class PydropWindow(Adw.ApplicationWindow):
         else:
             paintable = self.preview_image.get_paintable()
         drag_source.set_icon(paintable, 75, 75)
+
+    def on_drag_end(self, drag_source, drag, delete_data):
+        self.close()
 
     # TODO: document this behaviour somewhere
     def on_key_release(self, event_controller_key, keycode, *args):
