@@ -130,15 +130,24 @@ class PydropWindow(Adw.ApplicationWindow):
         button.data = dropped_item
 
     def _remove_item_on_button_click(self, button):
-        # TODO: handle case where files become zero
         got_it, position = self.list_store.find(button.data)
         if not got_it:
             raise Exception("Cannot find the element for deletion")
         self.list_store.remove(position)
         self.dropped_items.remove(button.data)
+        self._refresh_ui_on_dropped_items_change()
+
+    def _refresh_ui_on_dropped_items_change(self):
+        # TODO: change this logic to be better
         self.count = len(self.dropped_items)
+        if self.count == 0:
+            self.stack.set_visible_child(self.initial_stack)
+        else:
+            self.stack.set_visible_child(self.eventbox)
+
         self.button.set_label(f"{self.count} Files")
         tools.set_image(self.dropped_items, self.preview_image)
+
 
     def on_download(self):
         match self.stack.get_visible_child().get_buildable_id():
@@ -161,9 +170,7 @@ class PydropWindow(Adw.ApplicationWindow):
         for item in self.dropped_items:
             self.list_store.append(item)
 
-        self.count = count
-        self.button.set_label(f"{self.count} Files")
-        tools.set_image(self.dropped_items, self.preview_image)
+        self._refresh_ui_on_dropped_items_change()
 
     def on_accept(self, target, drop):
         drag = drop.get_drag()
