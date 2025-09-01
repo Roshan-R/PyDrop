@@ -42,7 +42,8 @@ class ParseData(GObject.Object):
         for file in file_list.get_files():
             # TODO: error handling if file path did not run correctly
             file_path = file.get_path()
-            self.dropped_items.append(DroppedItem(file_path))
+            file_name = file.get_basename()
+            self.dropped_items.append(DroppedItem(file_path, file_name))
             self.count += 1
             callback(self.count)
 
@@ -50,7 +51,7 @@ class ParseData(GObject.Object):
         file_path = tools.generate_file_path(self.count, "png")
         memory_texture.save_to_png(file_path)
         paintable = memory_texture.get_current_image()
-        self.dropped_items.append(DroppedItem(file_path), paintable)
+        self.dropped_items.append(DroppedItem(file_path, str(self.count), paintable))
         self.count += 1
         callback(self.count)
 
@@ -65,7 +66,7 @@ class ParseData(GObject.Object):
         file_path = tools.generate_file_path(first_word, "txt")
         with open(f"{file_path}", "w+") as f:
             f.write(text)
-        self.dropped_items.append(DroppedItem(file_path))
+        self.dropped_items.append(DroppedItem(file_path, first_word))
         callback(self.count)
 
     def handle_link(self, link):
@@ -120,7 +121,7 @@ class ParseData(GObject.Object):
             with open(file_path, "wb") as f:
                 f.write(bytes(buffer))
             # TODO: generate paintable from here itself
-            self.dropped_items.append(DroppedItem(file_path))
+            self.dropped_items.append(DroppedItem(file_path, str(self.count)))
             self.toggle_download_func()
             self.callback(self.count)
 
@@ -128,6 +129,8 @@ class ParseData(GObject.Object):
         file_path = f"{BASE_DIR}/{self.count}.desktop"
         with open(file_path, "w+") as f:
             f.write(tools.get_desktop(self.link))
-            self.dropped_items.append(DroppedItem(file_path))
+            self.dropped_items.append(
+                DroppedItem(file_path, str(self.count) + ".desktop")
+            )
         mime = "text/html"
         self.callback(self.count, mime)

@@ -1,28 +1,34 @@
 import gi
 
 gi.require_version("Gtk", "4.0")  # noqa
-gi.require_version('Gdk', '4.0') # noqa
+gi.require_version("Gdk", "4.0")  # noqa
 
-from gi.repository import Gio, Gdk
+from gi.repository import Gio, Gdk, GObject
 from .utils.tools import get_paintable_from_gicon, pixbuf_size
 from gi.repository.GdkPixbuf import Pixbuf
 from gi.repository.Gdk import Texture
 
 
-class DroppedItem:
+class DroppedItem(GObject.Object):
     def __init__(
         self,
         file_path: str,
+        file_name: str,
         paintable: None | Gdk.Paintable = None,
         mime_type: str | None = None,
     ):
         self.file_path = file_path
-        if paintable is None:
+        self.file_name = file_name
+        if paintable:
+            self.paintable = paintable
+        else:
             if mime_type:
                 self.mime_type = mime_type
                 self.generate_paintable_from_mimetype()
             else:
                 self.generate_paintable_from_file_path()
+
+        super().__init__()
 
     def generate_paintable_from_mimetype(self):
         icon = Gio.content_type_get_icon(self.mime_type)

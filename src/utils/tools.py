@@ -61,7 +61,7 @@ def create_overlayed_paintable(dropped_items):
     return snapshot.to_paintable()
 
 
-def set_image(dropped_items, image_widget, mime_type=None):
+def set_image(dropped_items, image_widget):
     """
     Sets an appropriate image or icon on the provided image widget based on
     the MIME type or file content.

@@ -22,7 +22,22 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw  # noqa
+from gi.repository import Gtk, Gio, Adw, Gdk  # noqa
+
+
+def apply_custom_css():
+    css = b"""
+    gridview {
+        background-color: @popover_bg_color;
+    }
+"""
+    provider = Gtk.CssProvider()
+    provider.load_from_data(css)
+
+    display = Gdk.Display.get_default()
+    Gtk.StyleContext.add_provider_for_display(
+        display, provider, Gtk.STYLE_PROVIDER_PRIORITY_USER
+    )
 
 
 class Application(Adw.Application):
@@ -32,6 +47,7 @@ class Application(Adw.Application):
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
             resource_base_path="/com/github/Roshan_R/PyDrop/",
         )
+        apply_custom_css()
         action = Gio.SimpleAction(name="about")
         action.connect("activate", self.show_about_dialog)
         self.add_action(action)

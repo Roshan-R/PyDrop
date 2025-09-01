@@ -59,11 +59,13 @@ template $PydropWindow : Adw.ApplicationWindow {
               pixel-size: 150;
               use-fallback: true;
             }
-            Button button {
+
+            MenuButton button {
               label: "button";
               name: "button";
               halign: center;
               margin-bottom: 10;
+              popover: plain_popover;
             }
           }
 
@@ -88,6 +90,20 @@ template $PydropWindow : Adw.ApplicationWindow {
       }
     }
   }
+}
+
+Popover plain_popover {
+  has-arrow: true;
+  name: "popover";
+  height-request: 400;
+  child: ScrolledWindow{
+    propagate-natural-width: true;
+    min-content-height: 170;
+    GridView grid_view{
+      enable-rubberband: true;
+      max-columns: 3;
+    }
+  };
 }
 
 menu menu {

@@ -26,7 +26,7 @@ gi.require_version("Adw", "1")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
 
-from gi.repository import Gtk, Gdk, Adw, GObject, GLib  # noqa
+from gi.repository import Gtk, Gdk, Adw, GObject, GLib, Gio  # noqa
 
 
 @Gtk.Template(resource_path="/com/github/Roshan_R/PyDrop/ui/window.ui")
@@ -41,14 +41,14 @@ class PydropWindow(Adw.ApplicationWindow):
     stack = Gtk.Template.Child()
     spinner_box = Gtk.Template.Child()
     eventbox = Gtk.Template.Child()
-    # TODO : make iconview
-    # iconview = Gtk.Template.Child()
     initial_stack = Gtk.Template.Child()
+    grid_view = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.setup_variables()
         self.setup_signals()
+        self.setup_gridview()
 
     def setup_variables(self):
         self.count = 0
@@ -75,6 +75,71 @@ class PydropWindow(Adw.ApplicationWindow):
         event_controller_key.connect("key-released", self.on_key_release)
         self.add_controller(event_controller_key)
 
+    def setup_gridview(self):
+        self.list_store = Gio.ListStore()
+        # TODO: might have to change this
+        ss = Gtk.SingleSelection()
+        ss.set_model(self.list_store)
+        self.grid_view.set_model(ss)
+
+        factory = Gtk.SignalListItemFactory()
+        factory.connect("setup", self._on_factory_setup)
+        factory.connect("bind", self._on_factory_bind)
+
+        self.grid_view.set_factory(factory)
+
+    def _on_factory_setup(self, fact, item):
+        """
+        Gtk.Overlay
+        ├── Gtk.Box (Vertical)
+        │   ├── Gtk.Image
+        │   └── Gtk.Label
+        └── Gtk.Button (Overlay: top-right, close icon)
+        """
+        box = Gtk.Box()
+        box.set_orientation(Gtk.Orientation.VERTICAL)
+        image = Gtk.Image()
+        image.set_pixel_size(150)
+        box.append(image)
+        label = Gtk.Label()
+        box.append(label)
+
+        button = Gtk.Button.new_from_icon_name("window-close-symbolic")
+        button.set_halign(Gtk.Align.END)
+        button.set_valign(Gtk.Align.START)
+        button.add_css_class("destructive-action")
+        button.connect("clicked", self._remove_item_on_button_click)
+
+        overlay = Gtk.Overlay()
+        overlay.set_child(box)
+        overlay.add_overlay(button)
+        item.set_child(overlay)
+
+    def _on_factory_bind(self, fact, item):
+        overlay = item.get_child()
+        box = overlay.get_child()
+        image = box.get_first_child()
+        label = box.get_last_child()
+
+        dropped_item = item.get_item()
+        image.set_from_paintable(dropped_item.paintable)
+        label.set_label(dropped_item.file_name)
+
+        # Set the model item on the button for later access
+        button = overlay.get_last_child()
+        button.data = dropped_item
+
+    def _remove_item_on_button_click(self, button):
+        # TODO: handle case where files become zero
+        got_it, position = self.list_store.find(button.data)
+        if not got_it:
+            raise Exception("Cannot find the element for deletion")
+        self.list_store.remove(position)
+        self.dropped_items.remove(button.data)
+        self.count = len(self.dropped_items)
+        self.button.set_label(f"{self.count} Files")
+        tools.set_image(self.dropped_items, self.preview_image)
+
     def on_download(self):
         match self.stack.get_visible_child().get_buildable_id():
             case "initial_stack" | "eventbox":
@@ -92,9 +157,13 @@ class PydropWindow(Adw.ApplicationWindow):
             self.eventbox.add_controller(self.drag_source)
             self.stack.set_visible_child(self.eventbox)
 
+        self.list_store.remove_all()
+        for item in self.dropped_items:
+            self.list_store.append(item)
+
         self.count = count
         self.button.set_label(f"{self.count} Files")
-        tools.set_image(self.dropped_items, self.preview_image, mime_type)
+        tools.set_image(self.dropped_items, self.preview_image)
 
     def on_accept(self, target, drop):
         drag = drop.get_drag()
