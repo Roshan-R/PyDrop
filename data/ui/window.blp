@@ -9,86 +9,84 @@ template $PydropWindow : Adw.ApplicationWindow {
   width-request: 250;
   resizable: false;
 
-  WindowHandle {
+  Box droparea {
+    orientation: vertical;
 
-    Box droparea {
-      orientation: vertical;
+    Adw.HeaderBar headerbar {
+      decoration-layout: ":close";
+      title-widget:
+      Adw.WindowTitle {
+        title: _("PyDrop");
+      };
 
-      Adw.HeaderBar headerbar {
-        decoration-layout: ":close";
-        title-widget:
-        Adw.WindowTitle {
-          title: _("PyDrop");
-        };
-
-        MenuButton menubutton {
-          icon-name: "open-menu-symbolic";
-          menu-model: menu;
-        }
-
-        styles [
-          "flat",
-        ]
+      MenuButton menubutton {
+        icon-name: "open-menu-symbolic";
+        menu-model: menu;
       }
 
-      Box drag_source {
-        orientation: vertical;
+      styles [
+        "flat",
+      ]
+    }
 
-        Stack stack {
-          transition-duration: 100;
+    Box drag_source {
+      orientation: vertical;
 
-          Box initial_stack {
-            orientation: vertical;
-            margin-bottom: 24;
+      Stack stack {
+        transition-duration: 100;
+
+        Box initial_stack {
+          orientation: vertical;
+          margin-bottom: 24;
+          vexpand: true;
+
+          Image {
+            pixel-size: 50;
+            valign: center;
             vexpand: true;
+            icon-name: "go-jump-symbolic";
+          }
+        }
 
-            Image {
-              pixel-size: 50;
-              valign: center;
-              vexpand: true;
-              icon-name: "go-jump-symbolic";
-            }
+        Box eventbox {
+          halign: center;
+          valign: center;
+          orientation: vertical;
+
+          Image preview_image {
+            pixel-size: 150;
+            use-fallback: true;
           }
 
-          Box eventbox {
+          MenuButton button {
+            label: "button";
+            name: "button";
+            halign: center;
+            margin-bottom: 10;
+            popover: plain_popover;
+          }
+        }
+
+        Box spinner_box {
+          orientation: vertical;
+          margin-bottom: 24;
+          vexpand: true;
+
+          Adw.Spinner spinner {
             halign: center;
             valign: center;
-            orientation: vertical;
-
-            Image preview_image {
-              pixel-size: 150;
-              use-fallback: true;
-            }
-
-            MenuButton button {
-              label: "button";
-              name: "button";
-              halign: center;
-              margin-bottom: 10;
-              popover: plain_popover;
-            }
-          }
-
-          Box spinner_box {
-            orientation: vertical;
-            margin-bottom: 24;
+            width-request: 48;
+            height-request: 48;
             vexpand: true;
-
-            Adw.Spinner spinner {
-              halign: center;
-              valign: center;
-              width-request: 48;
-              height-request: 48;
-              vexpand: true;
-          }
-            Label{
-              label: _("<b>Downloading</b>");
-              use-markup: true;
-            }
+        }
+          Label{
+            label: _("<b>Downloading</b>");
+            use-markup: true;
           }
         }
       }
     }
+
   }
 }
 
